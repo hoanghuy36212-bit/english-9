@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English 9 Adventure - Chinh Phục Tiếng Anh 9</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #f0f4f8;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 3D Button & Card Styling (Duolingo/Game inspired) */
+    .btn-3d {
+      transition: all 0.1s ease;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    }
+    .btn-3d:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+    .btn-3d:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: translateY(2px);
+    }
+
+    .btn-green { background-color: #58cc02; box-shadow: 0 4px 0 #46a302; color: white; }
+    .btn-green:hover:not(:disabled) { background-color: #61e002; }
+    
+    .btn-blue { background-color: #1cb0f6; box-shadow: 0 4px 0 #1899d6; color: white; }
+    .btn-blue:hover:not(:disabled) { background-color: #2bc0ff; }
+
+    .btn-purple { background-color: #ce82ff; box-shadow: 0 4px 0 #a55eea; color: white; }
+    .btn-purple:hover:not(:disabled) { background-color: #d99bff; }
+
+    .btn-amber { background-color: #ffc800; box-shadow: 0 4px 0 #e5b400; color: #4a3800; }
+    .btn-amber:hover:not(:disabled) { background-color: #ffd433; }
+
+    .btn-red { background-color: #ff4b4b; box-shadow: 0 4px 0 #ea2b2b; color: white; }
+    .btn-red:hover:not(:disabled) { background-color: #ff6666; }
+
+    .btn-white { background-color: #ffffff; box-shadow: 0 4px 0 #e5e7eb; border: 2px solid #e5e7eb; color: #374151; }
+    .btn-white:hover:not(:disabled) { background-color: #f9fafb; }
+
+    /* Flip Card Effect */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1); }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float { animation: float 3s ease-in-out infinite; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop { animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- TOP NAVIGATION / HUD BAR -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-2 border-slate-200 px-3 sm:px-6 py-2.5 shadow-sm">
+    <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+      <!-- Brand & Level -->
+      <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="app.goHome()">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+          E9
+        </div>
+        <div class="hidden sm:block">
+          <h1 class="font-black text-base leading-tight text-slate-800">English 9 Quest</h1>
+          <p class="text-xs font-bold text-emerald-600">Global Success Edition</p>
+        </div>
+      </div>
+
+      <!-- Player Stats HUD -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Level & XP Pill -->
+        <div class="flex items-center gap-2 bg-indigo-50 border-2 border-indigo-200 px-2.5 sm:px-3 py-1 rounded-2xl" title="Cấp độ & Kinh nghiệm">
+          <span class="bg-indigo-600 text-white text-xs font-black px-2 py-0.5 rounded-lg" id="hud-level">Lv.1</span>
+          <div class="w-16 sm:w-24 h-2.5 bg-indigo-200 rounded-full overflow-hidden">
+            <div id="hud-xp-bar" class="h-full bg-indigo-600 transition-all duration-500" style="width: 20%"></div>
+          </div>
+          <span class="text-xs font-extrabold text-indigo-700 hidden md:inline" id="hud-xp-text">0/100 XP</span>
+        </div>
+
+        <!-- Streak -->
+        <div class="flex items-center gap-1 bg-orange-50 border-2 border-orange-200 px-2.5 py-1 rounded-2xl" title="Chuỗi ngày học liên tiếp">
+          <span class="text-base sm:text-lg">🔥</span>
+          <span class="font-black text-sm text-orange-600" id="hud-streak">1</span>
+        </div>
+
+        <!-- Coins -->
+        <div class="flex items-center gap-1 bg-amber-50 border-2 border-amber-200 px-2.5 py-1 rounded-2xl cursor-pointer hover:bg-amber-100 transition" onclick="app.switchTab('shop')" title="Xu vàng - Nhấn để mở Cửa hàng">
+          <span class="text-base sm:text-lg">🪙</span>
+          <span class="font-black text-sm text-amber-600" id="hud-coins">50</span>
+        </div>
+
+        <!-- Hearts -->
+        <div class="flex items-center gap-1 bg-rose-50 border-2 border-rose-200 px-2.5 py-1 rounded-2xl cursor-pointer hover:bg-rose-100 transition" onclick="app.switchTab('shop')" title="Số tim (Mạng sống)">
+          <span class="text-base sm:text-lg">❤️</span>
+          <span class="font-black text-sm text-rose-600" id="hud-hearts">5</span>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button id="btn-sound" onclick="app.toggleSound()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Bật/Tắt âm thanh">
+          🔊
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT AREA -->
+  <main id="app-container" class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-6 py-5 pb-24">
+    <!-- Dynamic Views Rendered Here -->
+  </main>
+
+  <!-- BOTTOM NAVIGATION BAR (Mobile & Desktop Quick Switch) -->
+  <nav id="bottom-nav" class="fixed bottom-0 inset-x-0 z-30 bg-white border-t-2 border-slate-200 px-4 py-2 shadow-lg">
+    <div class="max-w-md mx-auto flex justify-around items-center">
+      <button onclick="app.switchTab('map')" id="nav-map" class="nav-btn flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl font-extrabold text-xs text-emerald-600 bg-emerald-50">
+        <span class="text-xl">🗺️</span>
+        <span>Bản đồ</span>
+      </button>
+      <button onclick="app.switchTab('shop')" id="nav-shop" class="nav-btn flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl font-extrabold text-xs text-slate-500 hover:bg-slate-100">
+        <span class="text-xl">🏪</span>
+        <span>Cửa hàng</span>
+      </button>
+      <button onclick="app.switchTab('badges')" id="nav-badges" class="nav-btn flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl font-extrabold text-xs text-slate-500 hover:bg-slate-100">
+        <span class="text-xl">🏆</span>
+        <span>Huy hiệu</span>
+      </button>
+      <button onclick="app.switchTab('profile')" id="nav-profile" class="nav-btn flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl font-extrabold text-xs text-slate-500 hover:bg-slate-100">
+        <span class="text-xl">🎒</span>
+        <span>Hồ sơ</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- CUSTOM MODAL / TOAST CONTAINER (Replaces alert/confirm) -->
+  <div id="modal-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div id="modal-box" class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-100 animate-pop text-center">
+      <div id="modal-icon" class="text-5xl mb-3">🎉</div>
+      <h3 id="modal-title" class="text-xl font-black text-slate-800 mb-2">Thông báo</h3>
+      <p id="modal-message" class="text-slate-600 font-semibold text-sm mb-6 leading-relaxed"></p>
+      <div id="modal-actions" class="flex gap-3 justify-center"></div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST -->
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white px-5 py-2.5 rounded-2xl font-bold text-sm shadow-xl opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2">
+    <span id="toast-icon">✨</span>
+    <span id="toast-text">Thông báo</span>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * 1. SOUND ENGINE (Web Audio API - No external files required)
+     * ============================================================================
+     */
+    class SoundFX {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type, duration, delay = 0, vol = 0.15) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+          gain.gain.setValueAtTime(vol, this.ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + delay);
+          osc.stop(this.ctx.currentTime + delay + duration);
+        } catch (e) {}
+      }
+
+      click() { this.playTone(520, 'sine', 0.08, 0, 0.1); }
+      correct() {
+        this.playTone(587.33, 'triangle', 0.12, 0, 0.18); // D5
+        this.playTone(880, 'triangle', 0.25, 0.1, 0.2);   // A5
+      }
+      wrong() {
+        this.playTone(220, 'sawtooth', 0.18, 0, 0.15);
+        this.playTone(175, 'sawtooth', 0.25, 0.12, 0.15);
+      }
+      levelUp() {
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+          this.playTone(f, 'triangle', 0.22, i * 0.1, 0.2);
+        });
+      }
+      victory() {
+        const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+        const times = [0, 0.1, 0.2, 0.3, 0.45, 0.58];
+        notes.forEach((f, i) => this.playTone(f, 'sine', 0.25, times[i], 0.22));
+      }
+      coin() {
+        this.playTone(987.77, 'sine', 0.08, 0, 0.15);
+        this.playTone(1318.51, 'sine', 0.2, 0.07, 0.15);
+      }
+    }
+
+    const sfx = new SoundFX();
+
+    /**
+     * ============================================================================
+     * 2. SPEECH SYNTHESIS (English Pronunciation)
+     * ============================================================================
+     */
+    function speakEnglish(text) {
+      sfx.click();
+      if (!('speechSynthesis' in window)) {
+        app.showToast('Trình duyệt của bạn không hỗ trợ đọc giọng nói.', '⚠️');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.92;
+      const voices = window.speechSynthesis.getVoices();
+      const enVoice = voices.find(v => v.lang.includes('en-US') && v.name.includes('Google')) || voices.find(v => v.lang.includes('en'));
+      if (enVoice) utterance.voice = enVoice;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    /**
+     * ============================================================================
+     * 3. CURRICULUM DATA: TIẾNG ANH 9 - GLOBAL SUCCESS (FULL 12 UNITS)
+     * ============================================================================
+     */
+    const UNITS_DATA = [
+      {
+        id: 1,
+        semester: 1,
+        code: "UNIT 1",
+        title: "Local Community",
+        viTitle: "Cộng đồng địa phương",
+        grammarTag: "Wh-word + to-V & Phrasal Verbs",
+        gradient: "from-emerald-400 to-teal-600",
+        icon: "🏘️",
+        bossName: "Bậc Thầy Làng Nghề",
+        bossIcon: "🏺",
+        badge: { id: "u1_master", name: "Sứ Giả Cộng Đồng", icon: "🏅", desc: "Chinh phục Unit 1: Local Community" },
+        vocab: [
+          { word: "artisan", ipa: "/ˌɑːtɪˈzæn/", type: "(n)", meaning: "nghệ nhân, thợ thủ công", example: "The artisans in Bat Trang village make beautiful pottery." },
+          { word: "handicraft", ipa: "/ˈhændikrɑːft/", type: "(n)", meaning: "sản phẩm thủ công", example: "Tourists love buying local handicrafts as souvenirs." },
+          { word: "pottery", ipa: "/ˈpɒtəri/", type: "(n)", meaning: "đồ gốm", example: "This village is famous for its traditional pottery." },
+          { word: "speciality", ipa: "/ˌspeʃiˈæləti/", type: "(n)", meaning: "đặc sản", example: "Com Vong is a famous speciality of Hanoi." },
+          { word: "tourist attraction", ipa: "/ˈtʊərɪst əˈtrækʃn/", type: "(n)", meaning: "điểm thu hút khách du lịch", example: "Hoi An Ancient Town is a popular tourist attraction." },
+          { word: "preserve", ipa: "/prɪˈzɜːv/", type: "(v)", meaning: "bảo tồn, giữ gìn", example: "We need to preserve our traditional craft villages." },
+          { word: "suburb", ipa: "/ˈsʌbɜːb/", type: "(n)", meaning: "vùng ngoại ô", example: "They moved from the city centre to a quiet suburb." },
+          { word: "facility", ipa: "/fəˈsɪləti/", type: "(n)", meaning: "cơ sở vật chất, tiện nghi", example: "Our neighbourhood has modern sports facilities." }
+        ],
+        grammarNote: {
+          title: "Từ để hỏi trước To-infinitive & Phrasal Verbs",
+          points: [
+            "<b>1. Wh-word + to-V:</b> Dùng sau các động từ <i>ask, wonder, decide, tell, know, explain</i> để diễn tả câu hỏi gián tiếp về việc nên làm gì.<br>(VD: <i>I don't know <b>where to buy</b> traditional lanterns.</i>)",
+            "<b>2. Cụm động từ (Phrasal Verbs) Unit 1:</b><br>• <b>pass down:</b> truyền lại (cho thế hệ sau)<br>• <b>live on:</b> sống nhờ vào (nghề gì/khoản thu gì)<br>• <b>deal with:</b> giải quyết, xử lý<br>• <b>look around:</b> đi ngắm nghía xung quanh<br>• <b>find out:</b> tìm ra thông tin<br>• <b>cut down on:</b> cắt giảm"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "We don't know ______ to ask for advice about the local craft fair.",
+            options: ["who", "what", "why", "which"],
+            answer: 0,
+            explain: "Dùng 'who + to-V' (hỏi ai) vì phía sau có động từ 'ask for advice' (xin lời khuyên từ ai)."
+          },
+          {
+            q: "The craft of basket weaving is usually ______ from generation to generation.",
+            options: ["passed down", "cut down", "looked around", "found out"],
+            answer: 0,
+            explain: "'pass down' có nghĩa là truyền lại từ thế hệ này sang thế hệ khác."
+          },
+          {
+            q: "Many families in this village ______ making conical hats.",
+            options: ["live on", "pass down", "deal with", "find out"],
+            answer: 0,
+            explain: "'live on + V-ing/N' nghĩa là sống nhờ vào nghề gì hoặc nguồn thu nhập nào đó."
+          },
+          {
+            q: "Could you tell me ______ to get to the nearest community centre?",
+            options: ["how", "what", "who", "whose"],
+            answer: 0,
+            explain: "'how to get to...' nghĩa là làm thế nào để đi đến đâu đó (hỏi đường)."
+          },
+          {
+            q: "Local authorities are trying to ______ the problem of waste in the neighbourhood.",
+            options: ["deal with", "look around", "pass down", "run out"],
+            answer: 0,
+            explain: "'deal with' nghĩa là giải quyết, xử lý một vấn đề."
+          }
+        ],
+        sentences: [
+          { hint: "Tôi không biết nên mua quà lưu niệm đặc sản ở đâu.", words: ["I", "don't", "know", "where", "to", "buy", "speciality", "souvenirs."] },
+          { hint: "Các nghệ nhân truyền lại kỹ năng của họ cho con cái.", words: ["Artisans", "pass", "down", "their", "skills", "to", "their", "children."] },
+          { hint: "Chúng tôi đã đi dạo quanh ngôi làng để ngắm cảnh.", words: ["We", "looked", "around", "the", "village", "to", "enjoy", "the", "view."] }
+        ],
+        bossQuestions: [
+          {
+            q: "A ______ is a person who makes things skillfully, especially with their hands.",
+            options: ["artisan", "electrician", "delivery person", "garbage collector"],
+            answer: 0,
+            explain: "Artisan: nghệ nhân, thợ thủ công làm đồ bằng tay khéo léo."
+          },
+          {
+            q: "She is wondering ______ to wear to the community festival tomorrow.",
+            options: ["what", "who", "where", "how"],
+            answer: 0,
+            explain: "'what to wear' nghĩa là mặc cái gì."
+          },
+          {
+            q: "Our village has ______ of clay, so we have to buy it from another province.",
+            options: ["run out", "passed down", "looked after", "got on"],
+            answer: 0,
+            explain: "'run out of' nghĩa là cạn kiệt, hết sạch nguyên liệu."
+          },
+          {
+            q: "Pho and Bun Cha are famous ______ of Hanoi that every visitor should try.",
+            options: ["specialities", "suburbs", "facilities", "potteries"],
+            answer: 0,
+            explain: "Specialities: các món đặc sản địa phương."
+          }
+        ]
+      },
+      {
+        id: 2,
+        semester: 1,
+        code: "UNIT 2",
+        title: "City Life",
+        viTitle: "Cuộc sống đô thị",
+        grammarTag: "Double Comparatives & Phrasal Verbs",
+        gradient: "from-sky-400 to-blue-600",
+        icon: "🏙️",
+        bossName: "Hộ Vệ Đô Thị",
+        bossIcon: "🤖",
+        badge: { id: "u2_master", name: "Nhà Thám Hiểm Đô Thị", icon: "🌆", desc: "Chinh phục Unit 2: City Life" },
+        vocab: [
+          { word: "bustling", ipa: "/ˈbʌslɪŋ/", type: "(adj)", meaning: "nhộn nhịp, hối hả", example: "Ho Chi Minh City is a bustling metropolis." },
+          { word: "congested", ipa: "/kənˈdʒestɪd/", type: "(adj)", meaning: "tắc nghẽn, đông đúc", example: "The streets are heavily congested during rush hour." },
+          { word: "metro", ipa: "/ˈmetrəʊ/", type: "(n)", meaning: "tàu điện ngầm / đường sắt đô thị", example: "Taking the metro helps reduce air pollution." },
+          { word: "skyscraper", ipa: "/ˈskaɪskreɪpə/", type: "(n)", meaning: "tòa nhà chọc trời", example: "Landmark 81 is a famous skyscraper in Vietnam." },
+          { word: "amenity", ipa: "/əˈmiːnəti/", type: "(n)", meaning: "tiện nghi công cộng", example: "The city offers great public amenities like parks and libraries." },
+          { word: "construction site", ipa: "/kənˈstrʌkʃn saɪt/", type: "(n)", meaning: "công trường xây dựng", example: "It's dusty and noisy near the construction site." },
+          { word: "hygiene", ipa: "/ˈhaɪdʒiːn/", type: "(n)", meaning: "vệ sinh", example: "Food hygiene is strictly checked in modern restaurants." },
+          { word: "commuter", ipa: "/kəˈmjuːtə/", type: "(n)", meaning: "người đi làm hàng ngày (từ xa)", example: "Thousands of commuters use the sky train every morning." }
+        ],
+        grammarNote: {
+          title: "So sánh kép (Double Comparatives) & Phrasal Verbs",
+          points: [
+            "<b>1. Cấu trúc Càng... càng...:</b><br><code>The + so sánh hơn + S + V, the + so sánh hơn + S + V</code><br>• Tính từ ngắn: <i>adj-er</i> (bigger, faster, earlier)<br>• Tính từ dài: <i>more + adj</i> (more crowded, more expensive)<br>• Bất quy tắc: <i>good → better, bad → worse, far → farther/further</i>",
+            "<b>2. Phrasal Verbs đô thị:</b><br>• <b>get around:</b> đi lại, di chuyển quanh<br>• <b>carry out:</b> tiến hành, thực hiện (dự án/khảo sát)<br>• <b>come down with:</b> bị ốm, mắc bệnh (cảm cúm...)<br>• <b>hang out with:</b> đi chơi cùng bạn bè<br>• <b>cut down on:</b> cắt giảm"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "______ the city gets, ______ the air pollution becomes.",
+            options: ["The more crowded / the worse", "The crowded / the bad", "More crowded / worse", "The most crowded / the worst"],
+            answer: 0,
+            explain: "So sánh kép: The + so sánh hơn (more crowded), the + so sánh hơn (worse - dạng so sánh hơn của bad)."
+          },
+          {
+            q: "The ______ the underground system is, the ______ people use private cars.",
+            options: ["better / fewer", "good / less", "best / fewer", "better / less"],
+            answer: 0,
+            explain: "So sánh hơn của 'good' là 'better'; 'cars' là danh từ đếm được số nhiều nên dùng 'fewer' (ít hơn)."
+          },
+          {
+            q: "Many city dwellers ______ with respiratory diseases due to fine dust.",
+            options: ["come down", "get around", "carry out", "hang out"],
+            answer: 0,
+            explain: "'come down with + bệnh' nghĩa là mắc phải căn bệnh gì đó."
+          },
+          {
+            q: "The city council decided to ______ a project to widen the main road.",
+            options: ["carry out", "get over", "cut down", "turn off"],
+            answer: 0,
+            explain: "'carry out a project' nghĩa là tiến hành, thực hiện một dự án."
+          },
+          {
+            q: "The ______ you live from the city centre, the ______ you spend on commuting.",
+            options: ["farther / more", "far / most", "farthest / more", "more far / less"],
+            answer: 0,
+            explain: "So sánh hơn của 'far' là 'farther/further'; 'more' (nhiều thời gian/tiền bạc hơn)."
+          }
+        ],
+        sentences: [
+          { hint: "Thành phố càng hiện đại, cuộc sống càng trở nên tiện lợi.", words: ["The", "more", "modern", "the", "city", "is,", "the", "more", "convenient", "life", "becomes."] },
+          { hint: "Di chuyển quanh thành phố bằng xe buýt rất rẻ.", words: ["Getting", "around", "the", "city", "by", "bus", "is", "very", "cheap."] },
+          { hint: "Các tòa nhà chọc trời mọc lên khắp trung tâm thành phố.", words: ["Skyscrapers", "are", "rising", "all", "over", "the", "city", "centre."] }
+        ],
+        bossQuestions: [
+          {
+            q: "The ______ you leave home, the ______ likely you are to avoid rush hour.",
+            options: ["earlier / more", "early / most", "earliest / more", "more early / less"],
+            answer: 0,
+            explain: "So sánh kép: The earlier (càng sớm) ... the more likely (càng có khả năng)."
+          },
+          {
+            q: "There is a lot of noise and dust coming from the ______ next to our school.",
+            options: ["construction site", "public amenity", "sky train", "green space"],
+            answer: 0,
+            explain: "Construction site: công trường xây dựng."
+          },
+          {
+            q: "Many ______ prefer taking the metro because it is faster than driving in traffic.",
+            options: ["commuters", "artisans", "counsellors", "immigrants"],
+            answer: 0,
+            explain: "Commuters: những người đi làm hàng ngày."
+          },
+          {
+            q: "Teenagers often ______ with their friends at shopping malls on weekends.",
+            options: ["hang out", "carry out", "come down", "pass down"],
+            answer: 0,
+            explain: "'hang out with' nghĩa là đi chơi, tụ tập cùng bạn bè."
+          }
+        ]
+      },
+      {
+        id: 3,
+        semester: 1,
+        code: "UNIT 3",
+        title: "Healthy Living for Teens",
+        viTitle: "Sống khỏe cho tuổi teen",
+        grammarTag: "Modal Verbs in 1st Conditional",
+        gradient: "from-rose-400 to-pink-600",
+        icon: "💪",
+        bossName: "Chiến Binh Sức Khỏe",
+        bossIcon: "⚡",
+        badge: { id: "u3_master", name: "Bậc Thầy Cân Bằng", icon: "🧘", desc: "Chinh phục Unit 3: Healthy Living" },
+        vocab: [
+          { word: "counsellor", ipa: "/ˈkaʊnsələ/", type: "(n)", meaning: "cố vấn, người tư vấn", example: "You can talk to the school counsellor about your stress." },
+          { word: "mental health", ipa: "/ˌmentl ˈhelθ/", type: "(n)", meaning: "sức khỏe tinh thần", example: "Regular exercise is great for both physical and mental health." },
+          { word: "well-balanced", ipa: "/ˌwel ˈbælənst/", type: "(adj)", meaning: "cân bằng, hợp lý", example: "A well-balanced diet keeps your body strong." },
+          { word: "optimistic", ipa: "/ˌɒptɪˈmɪstɪk/", type: "(adj)", meaning: "lạc quan", example: "Try to stay optimistic even when facing difficult exams." },
+          { word: "deadline", ipa: "/ˈdedlaɪn/", type: "(n)", meaning: "hạn chót", example: "I always finish my assignments before the deadline." },
+          { word: "distraction", ipa: "/dɪˈstrækʃn/", type: "(n)", meaning: "sự xao nhãng", example: "Turn off phone notifications to avoid distractions while studying." },
+          { word: "priority", ipa: "/praɪˈɒrəti/", type: "(n)", meaning: "sự ưu tiên", example: "Studying for the exam should be your top priority." },
+          { word: "accomplish", ipa: "/əˈkʌmplɪʃ/", type: "(v)", meaning: "hoàn thành, đạt được", example: "Good time management helps you accomplish your goals." }
+        ],
+        grammarNote: {
+          title: "Động từ khuyết thiếu trong Câu điều kiện loại 1",
+          points: [
+            "Thay vì chỉ dùng <i>will</i> ở mệnh đề chính của câu điều kiện loại 1, ta có thể dùng <b>can, may, might, must, should</b> để diễn tả khả năng, sự cho phép, sự cần thiết hoặc lời khuyên.",
+            "<b>Công thức:</b> <code>If + S + V(hiện tại đơn), S + can/may/might/must/should + V(nguyên thể)</code>",
+            "<b>Ví dụ:</b><br>• <i>If you want to stay healthy, you <b>should</b> eat more vegetables.</i> (Lời khuyên)<br>• <i>If you finish your homework early, you <b>can</b> play video games.</i> (Sự cho phép/khả năng)<br>• <i>If you don't sleep enough, you <b>might</b> feel tired tomorrow.</i> (Khả năng có thể xảy ra)"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "If you want to have good mental health, you ______ get enough sleep every night.",
+            options: ["should", "might not", "mustn't", "couldn't"],
+            answer: 0,
+            explain: "Dùng 'should' (nên) trong câu điều kiện loại 1 để đưa ra lời khuyên tốt cho sức khỏe."
+          },
+          {
+            q: "If Mai ______ her time well, she can avoid missing the deadline.",
+            options: ["manages", "managed", "will manage", "manage"],
+            answer: 0,
+            explain: "Mệnh đề If của câu điều kiện loại 1 chia thì hiện tại đơn. Chủ ngữ 'Mai' số ít nên dùng 'manages'."
+          },
+          {
+            q: "You ______ consult a doctor if the headache continues for several days.",
+            options: ["must", "can't", "would", "did"],
+            answer: 0,
+            explain: "Dùng 'must' (phải/cần thiết) để nhấn mạnh sự cần thiết phải đi khám bác sĩ."
+          },
+          {
+            q: "If we don't hurry up, we ______ miss the morning yoga class.",
+            options: ["might", "should", "must", "can't"],
+            answer: 0,
+            explain: "Dùng 'might' (có thể sẽ) để diễn tả một khả năng có thể xảy ra nếu không nhanh lên."
+          },
+          {
+            q: "If you ______ all your tasks early, you may go out with your friends.",
+            options: ["complete", "completed", "will complete", "completing"],
+            answer: 0,
+            explain: "Mệnh đề If chia hiện tại đơn với chủ ngữ 'you' -> động từ nguyên thể 'complete'."
+          }
+        ],
+        sentences: [
+          { hint: "Nếu bạn tập thể dục đều đặn, bạn có thể cải thiện sức khỏe.", words: ["If", "you", "exercise", "regularly,", "you", "can", "improve", "your", "health."] },
+          { hint: "Việc học nên là ưu tiên hàng đầu của bạn.", words: ["Studying", "should", "be", "your", "top", "priority."] },
+          { hint: "Hãy tắt điện thoại để tránh sự xao nhãng khi học bài.", words: ["Turn", "off", "your", "phone", "to", "avoid", "distractions", "while", "studying."] }
+        ],
+        bossQuestions: [
+          {
+            q: "To ______ your goal of passing the entrance exam, make a clear study plan.",
+            options: ["accomplish", "delay", "distract", "ignore"],
+            answer: 0,
+            explain: "Accomplish a goal: hoàn thành, đạt được mục tiêu."
+          },
+          {
+            q: "If you feel overwhelmed with schoolwork, you ______ talk to your school counsellor.",
+            options: ["should", "mustn't", "would", "had to"],
+            answer: 0,
+            explain: "Lời khuyên trong câu điều kiện loại 1: If + hiện tại đơn, S + should + V."
+          },
+          {
+            q: "Social media notifications are a major ______ when teenagers try to concentrate.",
+            options: ["distraction", "priority", "counsellor", "optimism"],
+            answer: 0,
+            explain: "Distraction: sự xao nhãng, gây mất tập trung."
+          },
+          {
+            q: "If Nam ______ his assignment tonight, he can go to the cinema tomorrow.",
+            options: ["finishes", "will finish", "finished", "finishing"],
+            answer: 0,
+            explain: "Mệnh đề If chia thì hiện tại đơn: Nam (ngôi 3 số ít) -> finishes."
+          }
+        ]
+      },
+      {
+        id: 4,
+        semester: 1,
+        code: "UNIT 4",
+        title: "Remembering the Past",
+        viTitle: "Nhớ về quá khứ",
+        grammarTag: "Past Continuous & Wish + Past Simple",
+        gradient: "from-amber-400 to-orange-600",
+        icon: "🏛️",
+        bossName: "Người Giữ Thời Gian",
+        bossIcon: "⏳",
+        badge: { id: "u4_master", name: "Nhà Sử Học Trẻ", icon: "📜", desc: "Chinh phục Unit 4: Remembering the Past" },
+        vocab: [
+          { word: "ancient", ipa: "/ˈeɪnʃənt/", type: "(adj)", meaning: "cổ đại, cổ xưa", example: "Hoi An is famous for its ancient houses and lanterns." },
+          { word: "castle", ipa: "/ˈkɑːsl/", type: "(n)", meaning: "lâu đài", example: "We explored a medieval castle during our trip to England." },
+          { word: "complex", ipa: "/ˈkɒmpleks/", type: "(n)", meaning: "quần thể, khu phức hợp", example: "The Complex of Hue Monuments is a UNESCO heritage site." },
+          { word: "monument", ipa: "/ˈmɒnjumənt/", type: "(n)", meaning: "tượng đài, công trình kỷ niệm", example: "We visited an ancient monument in the capital." },
+          { word: "religious", ipa: "/rɪˈlɪdʒəs/", type: "(adj)", meaning: "thuộc tôn giáo, tín ngưỡng", example: "Pagodas and temples are important religious buildings." },
+          { word: "takeaway", ipa: "/ˈteɪkəweɪ/", type: "(n)", meaning: "đồ ăn mang đi", example: "Fish and chips is a traditional British takeaway food." },
+          { word: "generation", ipa: "/ˌdʒenəˈreɪʃn/", type: "(n)", meaning: "thế hệ", example: "Older generations have many fascinating stories to tell." },
+          { word: "deep-rooted", ipa: "/ˌdiːp ˈruːtɪd/", type: "(adj)", meaning: "lâu đời, ăn sâu bén rễ", example: "Ancestor worship is a deep-rooted tradition in Vietnam." }
+        ],
+        grammarNote: {
+          title: "Quá khứ tiếp diễn & Câu ước (Wish + Quá khứ đơn)",
+          points: [
+            "<b>1. Thì Quá khứ tiếp diễn (Past Continuous):</b> Diễn tả hành động đang xảy ra tại một thời điểm cụ thể trong quá khứ hoặc đang xảy ra thì hành động khác xen vào (thường dùng với <i>while / when</i>).<br><code>S + was/were + V-ing</code><br>(VD: <i>At 8 PM yesterday, we <b>were watching</b> a historical film.</i>)",
+            "<b>2. Câu ước ở hiện tại (Wish):</b> Diễn tả mong ước trái với thực tế ở hiện tại.<br><code>S + wish(es) + S + V2/ed (to be → were)</code><br>(VD: <i>I wish I <b>had</b> a time machine. / She wishes she <b>were</b> taller.</i>)"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "I wish I ______ more free time to visit ancient temples in Vietnam.",
+            options: ["had", "have", "will have", "am having"],
+            answer: 0,
+            explain: "Câu ước ở hiện tại: S + wish + S + V2/ed (quá khứ đơn của 'have' là 'had')."
+          },
+          {
+            q: "While my grandmother ______ a story about the past, the lights went out.",
+            options: ["was telling", "told", "is telling", "tells"],
+            answer: 0,
+            explain: "Hành động đang diễn ra trong quá khứ (was telling) thì hành động khác xen vào (went out)."
+          },
+          {
+            q: "Lan wishes she ______ in a peaceful countryside village instead of a noisy city.",
+            options: ["lived", "lives", "will live", "living"],
+            answer: 0,
+            explain: "Ước điều không có thật ở hiện tại -> động từ lùi về quá khứ đơn: 'lived'."
+          },
+          {
+            q: "What ______ you ______ at 9 o'clock last Sunday morning?",
+            options: ["were / doing", "did / do", "are / doing", "was / doing"],
+            answer: 0,
+            explain: "Có mốc thời gian cụ thể trong quá khứ (at 9 o'clock last Sunday morning) -> dùng quá khứ tiếp diễn 'were you doing'."
+          },
+          {
+            q: "I wish there ______ no traffic jams in our city during rush hour.",
+            options: ["were", "are", "is", "will be"],
+            answer: 0,
+            explain: "Trong câu ước hiện tại, động từ 'to be' luôn chia là 'were' cho mọi ngôi."
+          }
+        ],
+        sentences: [
+          { hint: "Tôi ước gì tôi có thể du hành ngược thời gian.", words: ["I", "wish", "I", "could", "travel", "back", "in", "time."] },
+          { hint: "Quần thể di tích Cố đô Huế rất tráng lệ.", words: ["The", "Complex", "of", "Hue", "Monuments", "is", "very", "magnificent."] },
+          { hint: "Tôn trọng người lớn tuổi là một truyền thống lâu đời.", words: ["Respecting", "the", "elderly", "is", "a", "deep-rooted", "tradition."] }
+        ],
+        bossQuestions: [
+          {
+            q: "At this time yesterday, the students ______ about Vietnamese historical monuments.",
+            options: ["were learning", "learned", "are learning", "learn"],
+            answer: 0,
+            explain: "'At this time yesterday' là dấu hiệu của thì Quá khứ tiếp diễn."
+          },
+          {
+            q: "Phong wishes he ______ speak English as fluently as a native speaker.",
+            options: ["could", "can", "will", "may"],
+            answer: 0,
+            explain: "Trong câu ước hiện tại, 'can' lùi thì thành 'could'."
+          },
+          {
+            q: "Drinking tea with family is a ______ habit in many Vietnamese households.",
+            options: ["deep-rooted", "portable", "ruinous", "concentric"],
+            answer: 0,
+            explain: "Deep-rooted: lâu đời, ăn sâu vào nếp sống."
+          },
+          {
+            q: "My dad ______ the old photos when he found his childhood diary.",
+            options: ["was tidying", "tidied", "tidies", "has tidied"],
+            answer: 0,
+            explain: "Hành động đang dọn dẹp (was tidying) bị cắt ngang bởi hành động tìm thấy (found)."
+          }
+        ]
+      },
+      {
+        id: 5,
+        semester: 1,
+        code: "UNIT 5",
+        title: "Our Experiences",
+        viTitle: "Những trải nghiệm của chúng ta",
+        grammarTag: "Present Perfect (ever, never, yet, already...)",
+        gradient: "from-purple-500 to-indigo-600",
+        icon: "🎒",
+        bossName: "Nhà Du Hành Kỳ Cựu",
+        bossIcon: "🚀",
+        badge: { id: "u5_master", name: "Nhà Thám Hiểm Kỳ Cựu", icon: "🧭", desc: "Chinh phục Unit 5: Our Experiences" },
+        vocab: [
+          { word: "exhilarating", ipa: "/ɪɡˈzɪləreɪtɪŋ/", type: "(adj)", meaning: "đầy phấn khích, sảng khoái", example: "Paragliding over the mountains was an exhilarating experience." },
+          { word: "embarrassing", ipa: "/ɪmˈbærəsɪŋ/", type: "(adj)", meaning: "ngượng ngùng, xấu hổ", example: "Forgetting my lines on stage was an embarrassing moment." },
+          { word: "unpleasant", ipa: "/ʌnˈpleznt/", type: "(adj)", meaning: "khó chịu, không vui vẻ", example: "Getting caught in the heavy rain was an unpleasant experience." },
+          { word: "eco-tour", ipa: "/ˈiːkəʊ tʊə/", type: "(n)", meaning: "du lịch sinh thái", example: "We joined an eco-tour to explore the national park." },
+          { word: "fauna", ipa: "/ˈfɔːnə/", type: "(n)", meaning: "hệ động vật", example: "Cuc Phuong National Park has rich flora and fauna." },
+          { word: "flora", ipa: "/ˈflɔːrə/", type: "(n)", meaning: "hệ thực vật", example: "Scientists are studying the rare flora in the rainforest." },
+          { word: "seabed", ipa: "/ˈsiːbed/", type: "(n)", meaning: "đáy biển", example: "Divers saw colorful corals on the seabed." },
+          { word: "brilliant", ipa: "/ˈbrɪliənt/", type: "(adj)", meaning: "tuyệt vời, xuất sắc", example: "We had a brilliant time at the summer camp." }
+        ],
+        grammarNote: {
+          title: "Thì Hiện tại hoàn thành (Present Perfect)",
+          points: [
+            "<b>1. Công thức:</b> <code>S + have/has + V3/ed (Past Participle)</code>",
+            "<b>2. Cách dùng trong Unit 5:</b> Diễn tả một trải nghiệm, kinh nghiệm trong đời tính đến hiện tại (không rõ thời điểm cụ thể) hoặc hành động vừa mới xảy ra / chưa xảy ra.",
+            "<b>3. Dấu hiệu nhận biết:</b><br>• <b>ever</b> (đã từng - trong câu hỏi), <b>never</b> (chưa từng)<br>• <b>already</b> (rồi), <b>yet</b> (chưa - cuối câu phủ định/nghi vấn)<br>• <b>for + khoảng thời gian</b> (for 3 years), <b>since + mốc thời gian</b> (since 2022)"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "______ you ever ______ snorkelling to see the seabed in Nha Trang?",
+            options: ["Have / tried", "Did / try", "Are / trying", "Has / tried"],
+            answer: 0,
+            explain: "Hỏi về trải nghiệm trong đời với 'ever' -> dùng Hiện tại hoàn thành: Have you ever + V3/ed (tried)."
+          },
+          {
+            q: "My sister ______ to Sapa three times, and she still wants to go back.",
+            options: ["has been", "went", "was", "goes"],
+            answer: 0,
+            explain: "Diễn tả số lần trải nghiệm tính đến hiện tại (three times) -> dùng Hiện tại hoàn thành 'has been'."
+          },
+          {
+            q: "We haven't ______ our tent yet because it started raining heavily.",
+            options: ["put up", "putting up", "puts up", "putted up"],
+            answer: 0,
+            explain: "Sau 'haven't' là V3/ed. Quá khứ phân từ của 'put' vẫn là 'put' (put up: dựng lều)."
+          },
+          {
+            q: "They have studied the local flora and fauna in this forest ______ 2020.",
+            options: ["since", "for", "yet", "ever"],
+            answer: 0,
+            explain: "2020 là một mốc thời gian cụ thể nên ta dùng 'since'."
+          },
+          {
+            q: "This is the most ______ performance I have ever watched!",
+            options: ["brilliant", "embarrassed", "bored", "amazed"],
+            answer: 0,
+            explain: "'brilliant' (tuyệt vời) dùng để miêu tả tính chất của màn trình diễn."
+          }
+        ],
+        sentences: [
+          { hint: "Bạn đã bao giờ tham gia một chuyến du lịch sinh thái chưa?", words: ["Have", "you", "ever", "joined", "an", "eco-tour?"] },
+          { hint: "Tôi chưa từng nhìn thấy rạn san hô dưới đáy biển trước đây.", words: ["I", "have", "never", "seen", "coral", "reefs", "on", "the", "seabed", "before."] },
+          { hint: "Đó là trải nghiệm đầy phấn khích nhất trong đời tôi.", words: ["That", "was", "the", "most", "exhilarating", "experience", "in", "my", "life."] }
+        ],
+        bossQuestions: [
+          {
+            q: "Nam ______ never ______ a coral reef with his own eyes.",
+            options: ["has / seen", "have / seen", "did / see", "was / seeing"],
+            answer: 0,
+            explain: "Chủ ngữ 'Nam' số ít + never + V3/ed (seen) trong thì Hiện tại hoàn thành."
+          },
+          {
+            q: "Going down the river on a bamboo raft was an ______ adventure!",
+            options: ["exhilarating", "embarrassed", "unpleasant", "ruinous"],
+            answer: 0,
+            explain: "Exhilarating: đầy hứng khởi, sảng khoái."
+          },
+          {
+            q: "Have you finished packing your backpack for the camping trip ______?",
+            options: ["yet", "already", "never", "since"],
+            answer: 0,
+            explain: "'yet' đứng ở cuối câu nghi vấn trong thì Hiện tại hoàn thành (đã xong chưa?)."
+          },
+          {
+            q: "The national park is home to diverse ______ and ______, including rare orchids and tigers.",
+            options: ["flora / fauna", "seabed / coral", "brochure / homestay", "castle / complex"],
+            answer: 0,
+            explain: "Flora and fauna: hệ thực vật và động vật."
+          }
+        ]
+      },
+      {
+        id: 6,
+        semester: 1,
+        code: "UNIT 6",
+        title: "Vietnamese Lifestyle: Then and Now",
+        viTitle: "Lối sống Việt Nam: Xưa và Nay",
+        grammarTag: "Verbs + To-infinitive & Verbs + V-ing",
+        gradient: "from-teal-400 to-cyan-600",
+        icon: "🚲",
+        bossName: "Đại Sứ Văn Hóa Việt",
+        bossIcon: "🐉",
+        badge: { id: "u6_master", name: "Tinh Hoa Văn Hóa Việt", icon: "🏮", desc: "Chinh phục Unit 6 & Hoàn thành Học kỳ I!" },
+        vocab: [
+          { word: "extended family", ipa: "/ɪkˌstendɪd ˈfæməli/", type: "(n)", meaning: "gia đình nhiều thế hệ", example: "In the past, most Vietnamese people lived in extended families." },
+          { word: "nuclear family", ipa: "/ˌnjuːkliə ˈfæməli/", type: "(n)", meaning: "gia đình hạt nhân (bố mẹ và con)", example: "Nuclear families are very common in modern cities today." },
+          { word: "privacy", ipa: "/ˈprɪvəsi/", type: "(n)", meaning: "sự riêng tư", example: "Teenagers today value their personal privacy." },
+          { word: "pursue", ipa: "/pəˈsjuː/", type: "(v)", meaning: "theo đuổi (ước mơ, sự nghiệp)", example: "Young people today have more freedom to pursue their passions." },
+          { word: "democratic", ipa: "/ˌdeməˈkrætɪk/", type: "(adj)", meaning: "dân chủ, bình đẳng", example: "Family relationships have become more democratic nowadays." },
+          { word: "various", ipa: "/ˈveəriəs/", type: "(adj)", meaning: "đa dạng, nhiều loại", example: "Students have various sources of information on the internet." },
+          { word: "depend on", ipa: "/dɪˈpend ɒn/", type: "(phr.v)", meaning: "phụ thuộc vào", example: "Students today depend less on printed books." },
+          { word: "replace", ipa: "/rɪˈpleɪs/", type: "(v)", meaning: "thay thế", example: "Emails and messages have largely replaced handwritten letters." }
+        ],
+        grammarNote: {
+          title: "Động từ theo sau bởi To-V hoặc V-ing",
+          points: [
+            "<b>1. Động từ + To-infinitive (to-V):</b><br><i>want, promise, decide, agree, learn, plan, hope, afford, refuse</i><br>(VD: <i>She decided <b>to pursue</b> a career in medicine.</i>)",
+            "<b>2. Động từ + V-ing (Gerund):</b><br><i>enjoy, fancy, finish, mind, avoid, suggest, practise, keep</i><br>(VD: <i>Grandparents enjoy <b>telling</b> folk tales to their grandchildren.</i>)",
+            "<b>3. Lưu ý đặc biệt:</b><br>• <b>remember/forget + to-V:</b> nhớ/quên phải làm gì (ở hiện tại/tương lai)<br>• <b>remember/forget + V-ing:</b> nhớ/quên đã làm gì (trong quá khứ)"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "Young people today fancy ______ online rather than writing handwritten letters.",
+            options: ["chatting", "to chat", "chat", "chatted"],
+            answer: 0,
+            explain: "Sau động từ 'fancy' (thích) luôn dùng dạng V-ing -> 'chatting'."
+          },
+          {
+            q: "My parents promised ______ me to the Museum of Ethnology this weekend.",
+            options: ["to take", "taking", "take", "took"],
+            answer: 0,
+            explain: "Sau động từ 'promise' (hứa) luôn dùng 'to-V' -> 'to take'."
+          },
+          {
+            q: "I still remember ______ traditional games like hide-and-seek when I was small.",
+            options: ["playing", "to play", "play", "played"],
+            answer: 0,
+            explain: "'remember + V-ing' diễn tả việc nhớ lại một kỷ niệm đã xảy ra trong quá khứ."
+          },
+          {
+            q: "Many students plan ______ abroad to experience different cultures.",
+            options: ["to study", "studying", "study", "studied"],
+            answer: 0,
+            explain: "Sau 'plan' (lên kế hoạch) dùng 'to-V' -> 'to study'."
+          },
+          {
+            q: "Would you mind ______ the volume down? I'm trying to concentrate.",
+            options: ["turning", "to turn", "turn", "turned"],
+            answer: 0,
+            explain: "Sau 'mind' luôn dùng V-ing -> 'turning'."
+          }
+        ],
+        sentences: [
+          { hint: "Ngày nay, nhiều người thích sống trong gia đình hạt nhân.", words: ["Nowadays,", "many", "people", "prefer", "living", "in", "nuclear", "families."] },
+          { hint: "Ông bà tôi rất thích kể chuyện ngày xưa.", words: ["My", "grandparents", "enjoy", "telling", "stories", "about", "the", "past."] },
+          { hint: "Giới trẻ ngày nay có nhiều cơ hội theo đuổi ước mơ.", words: ["Young", "people", "today", "have", "more", "chances", "to", "pursue", "their", "dreams."] }
+        ],
+        bossQuestions: [
+          {
+            q: "In an ______, grandparents, parents, and children live together under one roof.",
+            options: ["extended family", "nuclear family", "single family", "modern office"],
+            answer: 0,
+            explain: "Extended family: đại gia đình (nhiều thế hệ cùng chung sống)."
+          },
+          {
+            q: "Smartphones and laptops have ______ traditional oil lamps and black-and-white TVs.",
+            options: ["replaced", "pursued", "depended", "admired"],
+            answer: 0,
+            explain: "Replace: thay thế."
+          },
+          {
+            q: "My brother decided ______ a bicycle instead of asking for a motorbike.",
+            options: ["to ride", "riding", "ride", "rode"],
+            answer: 0,
+            explain: "Sau 'decide' (quyết định) dùng 'to-V' -> 'to ride'."
+          },
+          {
+            q: "Children today have more ______ because they often have their own bedrooms.",
+            options: ["privacy", "facility", "pottery", "itinerary"],
+            answer: 0,
+            explain: "Privacy: sự riêng tư."
+          }
+        ]
+      },
+      {
+        id: 7,
+        semester: 2,
+        code: "UNIT 7",
+        title: "Natural Wonders of the World",
+        viTitle: "Kỳ quan thiên nhiên thế giới",
+        grammarTag: "Reported Speech (Yes/No Questions)",
+        gradient: "from-green-500 to-emerald-700",
+        icon: "🏔️",
+        bossName: "Thần Núi Everest",
+        bossIcon: "🗻",
+        badge: { id: "u7_master", name: "Nhà Chinh Phục Kỳ Quan", icon: "⛰️", desc: "Chinh phục Unit 7: Natural Wonders" },
+        vocab: [
+          { word: "majestic", ipa: "/məˈdʒestɪk/", type: "(adj)", meaning: "uy nghi, hùng vĩ", example: "Mount Everest is the most majestic peak in the world." },
+          { word: "peak", ipa: "/piːk/", type: "(n)", meaning: "đỉnh núi", example: "Climbers reached the snowy peak after five days." },
+          { word: "paradise", ipa: "/ˈpærədaɪs/", type: "(n)", meaning: "thiên đường", example: "Phu Quoc Island is a tropical paradise for beach lovers." },
+          { word: "sustainable", ipa: "/səˈsteɪnəbl/", type: "(adj)", meaning: "bền vững", example: "Sustainable tourism helps protect natural wonders." },
+          { word: "biodiversity", ipa: "/ˌbaɪəʊdaɪˈvɜːsəti/", type: "(n)", meaning: "đa dạng sinh học", example: "The Amazon rainforest has incredible biodiversity." },
+          { word: "possess", ipa: "/pəˈzes/", type: "(v)", meaning: "sở hữu", example: "Vietnam possesses many breathtaking caves and beaches." },
+          { word: "admire", ipa: "/ədˈmaɪə/", type: "(v)", meaning: "chiêm ngưỡng, ngưỡng mộ", example: "Tourists stopped to admire the beauty of Ha Long Bay." },
+          { word: "hesitation", ipa: "/ˌhezɪˈteɪʃn/", type: "(n)", meaning: "sự do dự, lưỡng lự", example: "She accepted the invitation to explore Son Doong without hesitation." }
+        ],
+        grammarNote: {
+          title: "Câu tường thuật dạng câu hỏi Yes/No (Reported Speech)",
+          points: [
+            "<b>1. Công thức:</b><br><code>S + asked (+ O) / wanted to know + if / whether + S + V(lùi thì)</code>",
+            "<b>2. Quy tắc chuyển đổi bắt buộc:</b><br>• Bỏ trợ động từ <i>do/does/did</i> và dấu chấm hỏi <i>(?)</i>.<br>• Đưa chủ ngữ lên trước động từ (trật tự câu trần thuật).<br>• <b>Lùi thì:</b> Hiện tại đơn → Quá khứ đơn; Hiện tại tiếp diễn → Quá khứ tiếp diễn; <i>will → would, can → could</i>.<br>• Đổi đại từ & trạng từ: <i>you → I/he/she, now → then, today → that day, tomorrow → the next day</i>.",
+            "<b>Ví dụ:</b> <i>\"Do you like Ha Long Bay?\" Tom asked me.<br>→ Tom asked me <b>if/whether I liked</b> Ha Long Bay.</i>"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "The tourist asked the guide ______ Ha Long Bay was a UNESCO World Heritage Site.",
+            options: ["if", "that", "what", "which"],
+            answer: 0,
+            explain: "Trong câu tường thuật dạng câu hỏi Yes/No, ta dùng 'if' hoặc 'whether' ngay sau động từ tường thuật 'asked'."
+          },
+          {
+            q: "\"Can we climb Fansipan in winter?\" → Lan asked me whether we ______ climb Fansipan in winter.",
+            options: ["could", "can", "will", "may"],
+            answer: 0,
+            explain: "Lùi thì trong câu tường thuật: 'can' chuyển thành 'could'."
+          },
+          {
+            q: "He wanted to know if I ______ to visit the Grand Canyon the following year.",
+            options: ["planned", "plan", "will plan", "am planning"],
+            answer: 0,
+            explain: "Động từ tường thuật ở quá khứ (wanted to know) -> động từ chính lùi về quá khứ đơn 'planned'."
+          },
+          {
+            q: "\"Are you taking photos of the waterfall now?\" → Mom asked if I ______ photos of the waterfall then.",
+            options: ["was taking", "am taking", "took", "take"],
+            answer: 0,
+            explain: "Hiện tại tiếp diễn (are taking) lùi thì thành Quá khứ tiếp diễn (was taking)."
+          },
+          {
+            q: "She asked me ______ I had ever seen snow on the mountain peak.",
+            options: ["whether", "who", "where", "why"],
+            answer: 0,
+            explain: "Dùng 'whether' (hoặc 'if') để tường thuật câu hỏi Yes/No ('Have you ever seen...?')."
+          }
+        ],
+        sentences: [
+          { hint: "Cô ấy hỏi tôi liệu tôi có thích khám phá các hang động tự nhiên không.", words: ["She", "asked", "me", "if", "I", "liked", "exploring", "natural", "caves."] },
+          { hint: "Du lịch bền vững giúp bảo vệ sự đa dạng sinh học.", words: ["Sustainable", "tourism", "helps", "protect", "biodiversity."] },
+          { hint: "Chúng tôi dừng lại để chiêm ngưỡng đỉnh núi hùng vĩ.", words: ["We", "stopped", "to", "admire", "the", "majestic", "mountain", "peak."] }
+        ],
+        bossQuestions: [
+          {
+            q: "\"Do many tourists visit Son Doong Cave every year?\" → Nam asked the ranger ______.",
+            options: ["if many tourists visited Son Doong Cave every year", "if did many tourists visit Son Doong Cave every year", "whether many tourists visit Son Doong Cave every year", "that many tourists visited Son Doong Cave every year"],
+            answer: 0,
+            explain: "Dùng 'if', bỏ trợ động từ 'did' và lùi thì 'visit' -> 'visited'."
+          },
+          {
+            q: "With its crystal-clear water and white sand, the island looks like a tropical ______.",
+            options: ["paradise", "hesitation", "commuter", "brochure"],
+            answer: 0,
+            explain: "Paradise: thiên đường."
+          },
+          {
+            q: "Australia ______ some of the most unique wildlife and natural wonders on Earth.",
+            options: ["possesses", "replaces", "accomplishes", "browses"],
+            answer: 0,
+            explain: "Possess: sở hữu."
+          },
+          {
+            q: "They wanted to know whether the local people ______ the forest.",
+            options: ["were protecting", "are protecting", "will protect", "protect"],
+            answer: 0,
+            explain: "Động từ trong câu tường thuật phải lùi về quá khứ ('were protecting')."
+          }
+        ]
+      },
+      {
+        id: 8,
+        semester: 2,
+        code: "UNIT 8",
+        title: "Tourism",
+        viTitle: "Du lịch",
+        grammarTag: "Relative Pronouns (who, which, whose)",
+        gradient: "from-cyan-500 to-blue-600",
+        icon: "✈️",
+        bossName: "Thuyền Trưởng Đại Dương",
+        bossIcon: "🧭",
+        badge: { id: "u8_master", name: "Du Khách Toàn Cầu", icon: "🌍", desc: "Chinh phục Unit 8: Tourism" },
+        vocab: [
+          { word: "package holiday", ipa: "/ˈpækɪdʒ ˈhɒlədeɪ/", type: "(n)", meaning: "kỳ nghỉ trọn gói", example: "A package holiday includes flights, hotels, and meals." },
+          { word: "self-guided", ipa: "/ˌself ˈɡaɪdɪd/", type: "(adj)", meaning: "tự túc, tự hướng dẫn", example: "Young travellers often prefer self-guided tours." },
+          { word: "itinerary", ipa: "/aɪˈtɪnərəri/", type: "(n)", meaning: "lịch trình chuyến đi", example: "We planned a detailed itinerary for our 5-day trip to Da Lat." },
+          { word: "homestay", ipa: "/ˈhəʊmsteɪ/", type: "(n)", meaning: "nhà dân cho khách du lịch thuê", example: "Staying at a homestay helps you learn about local culture." },
+          { word: "ruinous", ipa: "/ˈruːɪnəs/", type: "(adj)", meaning: "đổ nát, tàn tích", example: "Tourists visited the ruinous castle on the hill." },
+          { word: "smooth", ipa: "/smuːð/", type: "(adj)", meaning: "suôn sẻ, êm ả", example: "Thanks to good preparation, we had a smooth journey." },
+          { word: "domestic", ipa: "/dəˈmestɪk/", type: "(adj)", meaning: "nội địa, trong nước", example: "Domestic tourism has grown rapidly in Vietnam." },
+          { word: "brochure", ipa: "/ˈbrəʊʃə/", type: "(n)", meaning: "tờ rơi / cuốn sách nhỏ quảng cáo", example: "I picked up a travel brochure at the airport." }
+        ],
+        grammarNote: {
+          title: "Đại từ quan hệ (Relative Pronouns: who, which, whose)",
+          points: [
+            "Dùng để nối hai mệnh đề và bổ sung ý nghĩa cho danh từ đứng trước nó (Mệnh đề quan hệ xác định):",
+            "• <b>who:</b> thay thế cho danh từ chỉ <b>người</b> (làm chủ ngữ hoặc tân ngữ).<br>(VD: <i>The tour guide <b>who</b> showed us around was very friendly.</i>)",
+            "• <b>which:</b> thay thế cho danh từ chỉ <b>vật, sự việc, địa điểm</b>.<br>(VD: <i>The brochure <b>which</b> is on the table gives info about Hoi An.</i>)",
+            "• <b>whose:</b> chỉ <b>sự sở hữu</b> cho cả người và vật (theo sau luôn là một danh từ: <i>whose + N</i>).<br>(VD: <i>That is the tourist <b>whose</b> passport was lost yesterday.</i>)"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "The travel agent ______ helped us book the package holiday was very helpful.",
+            options: ["who", "which", "whose", "where"],
+            answer: 0,
+            explain: "'The travel agent' (nhân viên đại lý du lịch) là danh từ chỉ người làm chủ ngữ -> dùng 'who'."
+          },
+          {
+            q: "We stayed at a cosy homestay ______ overlooks a green tea valley.",
+            options: ["which", "who", "whose", "whom"],
+            answer: 0,
+            explain: "'a cosy homestay' là danh từ chỉ vật/nơi chốn đóng vai trò chủ ngữ của mệnh đề quan hệ -> dùng 'which'."
+          },
+          {
+            q: "I met a backpacker ______ luggage was lost at the international airport.",
+            options: ["whose", "who", "which", "that"],
+            answer: 0,
+            explain: "Phía sau chỗ trống là danh từ 'luggage' (hành lý của người du lịch ba lô đó) -> chỉ sở hữu nên dùng 'whose'."
+          },
+          {
+            q: "The itinerary ______ our group prepared includes three famous museums.",
+            options: ["which", "who", "whose", "where"],
+            answer: 0,
+            explain: "'The itinerary' (lịch trình) là danh từ chỉ vật -> dùng 'which'."
+          },
+          {
+            q: "Do you know the family ______ homestay we rented in Sapa last summer?",
+            options: ["whose", "who", "which", "whom"],
+            answer: 0,
+            explain: "'whose homestay' = homestay của gia đình đó (chỉ sự sở hữu)."
+          }
+        ],
+        sentences: [
+          { hint: "Tôi thích đi du lịch tự túc hơn là kỳ nghỉ trọn gói.", words: ["I", "prefer", "self-guided", "tours", "to", "package", "holidays."] },
+          { hint: "Người hướng dẫn viên du lịch nói tiếng Anh rất trôi chảy.", words: ["The", "tour", "guide", "who", "led", "us", "spoke", "English", "fluently."] },
+          { hint: "Chúng tôi đã có một chuyến đi nội địa rất suôn sẻ.", words: ["We", "had", "a", "very", "smooth", "domestic", "trip."] }
+        ],
+        bossQuestions: [
+          {
+            q: "A ______ is a small book or magazine containing pictures and information about a holiday.",
+            options: ["brochure", "homestay", "seabed", "deadline"],
+            answer: 0,
+            explain: "Brochure: ấn phẩm/cuốn sách mỏng quảng cáo du lịch."
+          },
+          {
+            q: "The ancient temple ______ roof was damaged by the storm is being restored.",
+            options: ["whose", "which", "who", "that"],
+            answer: 0,
+            explain: "'whose roof' (mái của ngôi đền cổ đó) -> chỉ sở hữu cho vật vẫn dùng 'whose'."
+          },
+          {
+            q: "If you don't want to plan everything yourself, you should book a ______.",
+            options: ["package holiday", "self-guided tour", "construction site", "food chain"],
+            answer: 0,
+            explain: "Package holiday: kỳ nghỉ trọn gói đã được công ty du lịch lo từ A-Z."
+          },
+          {
+            q: "The tourists ______ arrived late missed the bus to the ruinous castle.",
+            options: ["who", "which", "whose", "whom"],
+            answer: 0,
+            explain: "'The tourists' chỉ người làm chủ ngữ -> dùng 'who'."
+          }
+        ]
+      },
+      {
+        id: 9,
+        semester: 2,
+        code: "UNIT 9",
+        title: "World Englishes",
+        viTitle: "Tiếng Anh trên thế giới",
+        grammarTag: "Defining Relative Clauses (Omitting Pronouns)",
+        gradient: "from-indigo-500 to-violet-600",
+        icon: "🌐",
+        bossName: "Học Giả Đa Ngôn Ngữ",
+        bossIcon: "📚",
+        badge: { id: "u9_master", name: "Bậc Thầy Ngôn Ngữ", icon: "🗣️", desc: "Chinh phục Unit 9: World Englishes" },
+        vocab: [
+          { word: "bilingual", ipa: "/ˌbaɪˈlɪŋɡwəl/", type: "(adj)", meaning: "sử dụng được hai thứ tiếng", example: "Children raised in two cultures often become bilingual." },
+          { word: "fluent", ipa: "/ˈfluːənt/", type: "(adj)", meaning: "trôi chảy, lưu loát", example: "She is fluent in both English and French." },
+          { word: "concentric", ipa: "/kənˈsentrɪk/", type: "(adj)", meaning: "đồng tâm (cùng chung một tâm)", example: "Kachru's model has three concentric circles of English." },
+          { word: "immigrant", ipa: "/ˈɪmɪɡrənt/", type: "(n)", meaning: "người nhập cư", example: "Immigrants bring their own accents and vocabulary to English." },
+          { word: "official language", ipa: "/əˈfɪʃl ˈlæŋɡwɪdʒ/", type: "(n)", meaning: "ngôn ngữ chính thức", example: "English is an official language in Singapore and India." },
+          { word: "look up", ipa: "/lʊk ʌp/", type: "(phr.v)", meaning: "tra cứu (từ điển, thông tin)", example: "You can look up new words in an online dictionary." },
+          { word: "pick up", ipa: "/pɪk ʌp/", type: "(phr.v)", meaning: "học lỏm, tiếp thu tự nhiên", example: "He picked up Australian English while living in Sydney." },
+          { word: "go over", ipa: "/ɡəʊ ˈəʊvə/", type: "(phr.v)", meaning: "ôn tập lại, xem kỹ lại", example: "Always go over your grammar notes before the test." }
+        ],
+        grammarNote: {
+          title: "Mệnh đề quan hệ xác định & Lược bỏ đại từ quan hệ",
+          points: [
+            "<b>1. Mệnh đề quan hệ xác định (Defining Relative Clauses):</b> Cung cấp thông tin thiết yếu để xác định danh từ đứng trước, <b>không dùng dấu phẩy</b>. Có thể dùng <i>who, which, that</i>.",
+            "<b>2. Khi nào được LƯỢC BỎ đại từ quan hệ (who/which/that)?</b><br>Khi đại từ quan hệ đóng vai trò làm <b>TÂN NGỮ (Object)</b> của mệnh đề quan hệ (tức là ngay sau <i>who/which/that</i> có một <b>Chủ ngữ + Động từ</b> khác).",
+            "<b>Ví dụ:</b><br>• <i>The dictionary <b>(which/that) I bought</b> yesterday is very useful.</i> → Được bỏ <i>which/that</i> vì sau nó có chủ ngữ <i>I</i>.<br>• <i>The student <b>who speaks</b> fluent English is my friend.</i> → <b>Không</b> được bỏ <i>who</i> vì nó làm chủ ngữ của <i>speaks</i>."
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "In which sentence can we OMIT (lược bỏ) the relative pronoun?",
+            options: ["The English accent (that) she has is easy to understand.", "The teacher who teaches us English is from New Zealand.", "Singapore is a country which has four official languages.", "People who are bilingual often have better memory."],
+            answer: 0,
+            explain: "Trong câu A, sau 'that' là chủ ngữ 'she' + động từ 'has', nên 'that' làm tân ngữ và có thể lược bỏ."
+          },
+          {
+            q: "If you don't know the meaning of a word, you should ______ it ______ in a dictionary.",
+            options: ["look / up", "go / over", "pick / up", "pass / down"],
+            answer: 0,
+            explain: "'look up a word' nghĩa là tra cứu nghĩa của từ trong từ điển."
+          },
+          {
+            q: "She ______ a lot of British slang while she was studying in London.",
+            options: ["picked up", "went over", "looked up", "carried out"],
+            answer: 0,
+            explain: "'pick up a language/slang' nghĩa là học tiếp thu ngôn ngữ một cách tự nhiên qua giao tiếp."
+          },
+          {
+            q: "The vocabulary list ______ our teacher gave us yesterday has 30 words.",
+            options: ["which", "who", "whose", "where"],
+            answer: 0,
+            explain: "'The vocabulary list' là vật -> dùng 'which' (hoặc 'that', hoặc lược bỏ)."
+          },
+          {
+            q: "Before submitting your essay, remember to ______ it carefully for spelling mistakes.",
+            options: ["go over", "pick up", "look around", "come down"],
+            answer: 0,
+            explain: "'go over' nghĩa là kiểm tra lại, rà soát lại kỹ lưỡng."
+          }
+        ],
+        sentences: [
+          { hint: "Tiếng Anh là ngôn ngữ chính thức ở nhiều quốc gia.", words: ["English", "is", "an", "official", "language", "in", "many", "countries."] },
+          { hint: "Cuốn từ điển tôi mua hôm qua rất hữu ích.", words: ["The", "dictionary", "I", "bought", "yesterday", "is", "very", "useful."] },
+          { hint: "Cô ấy có thể nói trôi chảy hai thứ tiếng.", words: ["She", "is", "bilingual", "and", "fluent", "in", "two", "languages."] }
+        ],
+        bossQuestions: [
+          {
+            q: "Braj Kachru proposed the model of three ______ circles of World Englishes.",
+            options: ["concentric", "domestic", "portable", "volcanic"],
+            answer: 0,
+            explain: "Three concentric circles: ba vòng tròn đồng tâm mô tả các nhóm quốc gia sử dụng tiếng Anh."
+          },
+          {
+            q: "The grammar rules ______ we are revising today belong to Unit 9.",
+            options: ["that", "who", "whose", "whom"],
+            answer: 0,
+            explain: "'The grammar rules' là vật -> dùng 'that' hoặc 'which'."
+          },
+          {
+            q: "A person who can speak two languages equally well is ______.",
+            options: ["bilingual", "ruinous", "demanding", "majestic"],
+            answer: 0,
+            explain: "Bilingual: song ngữ (nói được 2 ngôn ngữ)."
+          },
+          {
+            q: "In which sentence is the relative pronoun REQUIRED (không thể lược bỏ)?",
+            options: ["The man who invented this dictionary was a great scholar.", "The book which you lent me is fascinating.", "The accent that he speaks with sounds Australian.", "The words that we learned yesterday are easy."],
+            answer: 0,
+            explain: "Câu A: 'who' đứng ngay trước động từ 'invented' (làm chủ ngữ) nên bắt buộc phải giữ lại."
+          }
+        ]
+      },
+      {
+        id: 10,
+        semester: 2,
+        code: "UNIT 10",
+        title: "Planet Earth",
+        viTitle: "Hành tinh Trái Đất",
+        grammarTag: "Non-defining Relative Clauses",
+        gradient: "from-lime-500 to-green-700",
+        icon: "🌍",
+        bossName: "Vệ Thần Địa Cầu",
+        bossIcon: "🌿",
+        badge: { id: "u10_master", name: "Người Bảo Vệ Trái Đất", icon: "🌱", desc: "Chinh phục Unit 10: Planet Earth" },
+        vocab: [
+          { word: "habitat", ipa: "/ˈhæbɪtæt/", type: "(n)", meaning: "môi trường sống (của động thực vật)", example: "Deforestation destroys the natural habitat of many wild animals." },
+          { word: "ecosystem", ipa: "/ˈiːkəʊsɪstəm/", type: "(n)", meaning: "hệ sinh thái", example: "Coral reefs support a rich marine ecosystem." },
+          { word: "food chain", ipa: "/ˈfuːd tʃeɪn/", type: "(n)", meaning: "chuỗi thức ăn", example: "Every species plays an important role in the food chain." },
+          { word: "flora and fauna", ipa: "/ˌflɔːrə ənd ˈfɔːnə/", type: "(n)", meaning: "hệ thực vật và động vật", example: "We must protect the unique flora and fauna of our planet." },
+          { word: "nature reserve", ipa: "/ˈneɪtʃə rɪzɜːv/", type: "(n)", meaning: "khu bảo tồn thiên nhiên", example: "Endangered animals are kept safe in a nature reserve." },
+          { word: "ecological balance", ipa: "/ˌiːkəˈlɒdʒɪkl ˈbæləns/", type: "(n)", meaning: "cân bằng sinh thái", example: "Human activities are threatening the ecological balance." },
+          { word: "liquid water", ipa: "/ˈlɪkwɪd ˈwɔːtə/", type: "(n)", meaning: "nước ở thể lỏng", example: "Earth is the only known planet with liquid water on its surface." },
+          { word: "outer space", ipa: "/ˌaʊtə ˈspeɪs/", type: "(n)", meaning: "vũ trụ, không gian bên ngoài", example: "Astronauts can see Earth's blue oceans from outer space." }
+        ],
+        grammarNote: {
+          title: "Mệnh đề quan hệ không xác định (Non-defining Relative Clauses)",
+          points: [
+            "<b>1. Chức năng & Dấu câu:</b> Dùng để cung cấp thêm thông tin phụ cho danh từ đã xác định rõ (tên riêng, hoặc có <i>this, that, these, those, my, his...</i>).<br>⚠️ <b>BẮT BUỘC có dấu phẩy (,)</b> ngăn cách mệnh đề này với mệnh đề chính.",
+            "<b>2. Quy tắc vàng cần nhớ:</b><br>• Dùng <b>who</b> (cho người), <b>which</b> (cho vật), <b>whose</b> (sở hữu).<br>• ❌ <b>TUYỆT ĐỐI KHÔNG DÙNG 'THAT'</b> trong mệnh đề quan hệ không xác định.<br>• ❌ <b>KHÔNG ĐƯỢC LƯỢC BỎ</b> đại từ quan hệ dù nó làm tân ngữ.",
+            "<b>Ví dụ:</b> <i>Earth<b>, which</b> is the third planet from the Sun<b>,</b> supports millions of species.</i>"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "Mount Everest, ______ is located in the Himalayas, is the highest peak on Earth.",
+            options: ["which", "that", "who", "whose"],
+            answer: 0,
+            explain: "Sau tên riêng 'Mount Everest' có dấu phẩy -> Mệnh đề quan hệ không xác định -> dùng 'which' (cấm dùng 'that')."
+          },
+          {
+            q: "Mr. Minh, ______ is an environmental scientist, gave a talk about ecological balance.",
+            options: ["who", "that", "which", "whom"],
+            answer: 0,
+            explain: "'Mr. Minh' là tên riêng chỉ người + có dấu phẩy -> dùng 'who' (không dùng 'that')."
+          },
+          {
+            q: "The Amazon Rainforest, ______ trees produce much of the world's oxygen, is in danger.",
+            options: ["whose", "which", "that", "who"],
+            answer: 0,
+            explain: "'whose trees' = cây cối của rừng nhiệt đới Amazon (chỉ sự sở hữu)."
+          },
+          {
+            q: "Planet Earth, ______ has liquid water on its surface, is home to diverse ecosystems.",
+            options: ["which", "that", "where", "who"],
+            answer: 0,
+            explain: "Danh từ riêng 'Planet Earth' + dấu phẩy -> dùng 'which'."
+          },
+          {
+            q: "Which sentence is GRAMMATICALLY CORRECT?",
+            options: ["The Pacific Ocean, which is the largest ocean, covers a third of Earth.", "The Pacific Ocean, that is the largest ocean, covers a third of Earth.", "The Pacific Ocean which is the largest ocean covers a third of Earth.", "The Pacific Ocean, who is the largest ocean, covers a third of Earth."],
+            answer: 0,
+            explain: "Tên riêng 'The Pacific Ocean' cần có dấu phẩy và dùng 'which' (không dùng 'that' hay 'who')."
+          }
+        ],
+        sentences: [
+          { hint: "Trái Đất, hành tinh duy nhất có nước lỏng, cần được bảo vệ.", words: ["Earth,", "which", "has", "liquid", "water,", "needs", "to", "be", "protected."] },
+          { hint: "Nạn phá rừng phá hủy môi trường sống tự nhiên của động vật.", words: ["Deforestation", "destroys", "the", "natural", "habitat", "of", "animals."] },
+          { hint: "Mỗi loài đều quan trọng đối với sự cân bằng sinh thái.", words: ["Every", "species", "is", "important", "to", "ecological", "balance."] }
+        ],
+        bossQuestions: [
+          {
+            q: "A ______ is a protected area of land where wild animals and plants can live safely.",
+            options: ["nature reserve", "food chain", "outer space", "construction site"],
+            answer: 0,
+            explain: "Nature reserve: khu bảo tồn thiên nhiên."
+          },
+          {
+            q: "Neil Armstrong, ______ was the first human to walk on the Moon, saw Earth from outer space.",
+            options: ["who", "that", "which", "whose"],
+            answer: 0,
+            explain: "Tên riêng chỉ người + có dấu phẩy -> dùng 'who'."
+          },
+          {
+            q: "When one animal disappears from the ______, other species are affected too.",
+            options: ["food chain", "brochure", "touchscreen", "suburb"],
+            answer: 0,
+            explain: "Food chain: chuỗi thức ăn trong tự nhiên."
+          },
+          {
+            q: "Cuc Phuong National Park, ______ we visited last month, has rich flora and fauna.",
+            options: ["which", "that", "where", "who"],
+            answer: 0,
+            explain: "Sau dấu phẩy của mệnh đề quan hệ không xác định, dùng 'which' làm tân ngữ của 'visited' (không được dùng 'that' và không được lược bỏ)."
+          }
+        ]
+      },
+      {
+        id: 11,
+        semester: 2,
+        code: "UNIT 11",
+        title: "Electronic Devices",
+        viTitle: "Thiết bị điện tử",
+        grammarTag: "Suggest / Advise / Recommend + V-ing / Clause",
+        gradient: "from-blue-500 to-indigo-700",
+        icon: "📱",
+        bossName: "Siêu Trí Tuệ AI",
+        bossIcon: "🦾",
+        badge: { id: "u11_master", name: "Chuyên Gia Công Nghệ", icon: "💻", desc: "Chinh phục Unit 11: Electronic Devices" },
+        vocab: [
+          { word: "portable", ipa: "/ˈpɔːtəbl/", type: "(adj)", meaning: "nhỏ gọn, dễ mang theo", example: "A tablet is lightweight and portable for students." },
+          { word: "touchscreen", ipa: "/ˈtʌtʃskriːn/", type: "(n)", meaning: "màn hình cảm ứng", example: "Most modern smartphones have a large touchscreen." },
+          { word: "robotic vacuum cleaner", ipa: "/rəʊˈbɒtɪk ˈvækjuːm kliːnə/", type: "(n)", meaning: "robot hút bụi", example: "A robotic vacuum cleaner helps clean the floor automatically." },
+          { word: "smartwatch", ipa: "/ˈsmɑːtwɒtʃ/", type: "(n)", meaning: "đồng hồ thông minh", example: "My smartwatch tracks my heart rate and daily steps." },
+          { word: "camcorder", ipa: "/ˈkæmkɔːdə/", type: "(n)", meaning: "máy quay phim cầm tay", example: "Dad used a camcorder to record our family vacation." },
+          { word: "e-reader", ipa: "/ˈiː riːdə/", type: "(n)", meaning: "máy đọc sách điện tử", example: "You can store thousands of books on a single e-reader." },
+          { word: "3D printer", ipa: "/ˌθriː diː ˈprɪntə/", type: "(n)", meaning: "máy in 3D", example: "Engineers use a 3D printer to create plastic models." },
+          { word: "aluminium", ipa: "/ˌæljəˈmɪniəm/", type: "(n)", meaning: "nhôm (kim loại nhẹ)", example: "The laptop case is made of durable aluminium." }
+        ],
+        grammarNote: {
+          title: "Cấu trúc Suggest / Advise / Recommend",
+          points: [
+            "Dùng để đưa ra lời gợi ý, khuyên bảo hoặc đề xuất làm gì:",
+            "<b>1. Cộng trực tiếp với V-ing (khi nói chung chung, không nhắc tới đối tượng cụ thể):</b><br><code>S + suggest / advise / recommend + V-ing</code><br>(VD: <i>I recommend <b>buying</b> an e-reader for reading books.</i>)",
+            "<b>2. Cộng với mệnh đề (that) + S + (should) + V(nguyên thể):</b><br><code>S + suggest / advise / recommend + (that) + S + (should) + V-inf</code><br>(VD: <i>The teacher advised that Nam <b>(should) use</b> a laptop for his project.</i>)<br>⚠️ <i>Lưu ý:</i> Động từ trong mệnh đề sau 'that' luôn ở dạng <b>nguyên thể không 'to'</b> (kể cả chủ ngữ là he/she/it)!"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "The shop assistant recommended ______ a laptop with an aluminium case.",
+            options: ["choosing", "to choose", "chose", "choose"],
+            answer: 0,
+            explain: "Sau 'recommend' không có chủ ngữ mới theo sau -> dùng V-ing ('choosing')."
+          },
+          {
+            q: "My doctor advised that I ______ reduce my screen time before bedtime.",
+            options: ["should", "mustn't", "am", "was"],
+            answer: 0,
+            explain: "Cấu trúc: advise + (that) + S + (should) + V-inf."
+          },
+          {
+            q: "I suggest that Lan ______ a smartwatch to monitor her daily exercise.",
+            options: ["buy", "buys", "bought", "buying"],
+            answer: 0,
+            explain: "Trong mệnh đề giả định sau 'suggest that', động từ luôn chia ở dạng nguyên thể ('buy'), không thêm 's' dù chủ ngữ là 'Lan'."
+          },
+          {
+            q: "Experts suggest ______ old electronic devices at proper e-waste centres.",
+            options: ["recycling", "to recycle", "recycled", "recycles"],
+            answer: 0,
+            explain: "Suggest + V-ing -> 'recycling'."
+          },
+          {
+            q: "Dad recommended that we ______ a robotic vacuum cleaner to save housework time.",
+            options: ["get", "getting", "got", "gets"],
+            answer: 0,
+            explain: "Recommend + that + S + (should) + V nguyên thể ('get')."
+          }
+        ],
+        sentences: [
+          { hint: "Tôi khuyên bạn nên mua một chiếc máy đọc sách điện tử nhỏ gọn.", words: ["I", "recommend", "buying", "a", "portable", "e-reader."] },
+          { hint: "Bác sĩ khuyên rằng chúng ta nên hạn chế dùng màn hình cảm ứng.", words: ["The", "doctor", "advised", "that", "we", "should", "limit", "touchscreen", "use."] },
+          { hint: "Vỏ của chiếc máy tính bảng này được làm bằng nhôm.", words: ["The", "case", "of", "this", "tablet", "is", "made", "of", "aluminium."] }
+        ],
+        bossQuestions: [
+          {
+            q: "An ______ has an anti-glare screen that feels like real paper when reading.",
+            options: ["e-reader", "camcorder", "3D printer", "aluminium"],
+            answer: 0,
+            explain: "E-reader: máy đọc sách điện tử."
+          },
+          {
+            q: "The IT teacher suggested that Minh ______ his files on the cloud.",
+            options: ["store", "stores", "storing", "to store"],
+            answer: 0,
+            explain: "Suggest + that + S + (should) + V-inf ('store')."
+          },
+          {
+            q: "Because a smartphone is lightweight and ______, you can carry it in your pocket.",
+            options: ["portable", "ruinous", "concentric", "democratic"],
+            answer: 0,
+            explain: "Portable: nhỏ gọn, dễ mang theo bên người."
+          },
+          {
+            q: "She recommended ______ a 3D printer to make models for the science club.",
+            options: ["using", "to use", "used", "uses"],
+            answer: 0,
+            explain: "Recommend + V-ing -> 'using'."
+          }
+        ]
+      },
+      {
+        id: 12,
+        semester: 2,
+        code: "UNIT 12",
+        title: "Career Choices",
+        viTitle: "Lựa chọn nghề nghiệp",
+        grammarTag: "Concession, Result & Reason Clauses",
+        gradient: "from-fuchsia-500 to-purple-700",
+        icon: "🎓",
+        bossName: "Chúa Tể Tương Lai",
+        bossIcon: "👑",
+        badge: { id: "u12_master", name: "Huyền Thoại Tiếng Anh 9", icon: "🏆", desc: "Chinh phục trọn vẹn 12 Unit Tiếng Anh 9!" },
+        vocab: [
+          { word: "vocational", ipa: "/vəʊˈkeɪʃənl/", type: "(adj)", meaning: "thuộc về nghề nghiệp, hướng nghiệp", example: "He attended a vocational college to become a skilled chef." },
+          { word: "bartender", ipa: "/ˈbɑːtendə/", type: "(n)", meaning: "nhân viên pha chế đồ uống", example: "A creative bartender can invent many delicious mocktails." },
+          { word: "mechanic", ipa: "/məˈkænɪk/", type: "(n)", meaning: "thợ sửa máy, thợ cơ khí", example: "The mechanic repaired our car engine in two hours." },
+          { word: "garment worker", ipa: "/ˈɡɑːmənt ˈwɜːkə/", type: "(n)", meaning: "công nhân may", example: "Thousands of garment workers produce clothes for export." },
+          { word: "software engineer", ipa: "/ˈsɒftweər endʒɪˈnɪə/", type: "(n)", meaning: "kỹ sư phần mềm", example: "She wants to become a software engineer at a tech company." },
+          { word: "decisive", ipa: "/dɪˈsaɪsɪv/", type: "(adj)", meaning: "quyết đoán", example: "A good manager needs to be calm and decisive." },
+          { word: "rewarding", ipa: "/rɪˈwɔːdɪŋ/", type: "(adj)", meaning: "xứng đáng, bổ ích (mang lại niềm vui)", example: "Teaching is a challenging but very rewarding career." },
+          { word: "demanding", ipa: "/dɪˈmɑːndɪŋ/", type: "(adj)", meaning: "đòi hỏi cao, vất vả", example: "Being a surgeon is a demanding job that requires focus." }
+        ],
+        grammarNote: {
+          title: "Mệnh đề trạng ngữ chỉ Sự nhượng bộ, Kết quả & Nguyên nhân",
+          points: [
+            "<b>1. Mệnh đề chỉ sự nhượng bộ (Concession):</b><br><code>Although / Though + S + V, S + V</code> (Mặc dù... nhưng...)<br>(VD: <i><b>Although</b> the job is demanding, she loves it.</i>)",
+            "<b>2. Mệnh đề chỉ kết quả (Result):</b><br>• <code>S + V + so + adj/adv + that + S + V</code> (Quá... đến nỗi mà...)<br>• <code>S + V + such + (a/an) + adj + N + that + S + V</code><br>(VD: <i>He is <b>so decisive that</b> everyone trusts him. / It is <b>such a rewarding job that</b> many people apply.</i>)",
+            "<b>3. Mệnh đề chỉ nguyên nhân (Reason):</b><br><code>Because / Since + S + V, S + V</code> (Bởi vì... nên...)"
+          ]
+        },
+        grammarQuiz: [
+          {
+            q: "______ being a surgeon is very demanding, it is an extremely rewarding career.",
+            options: ["Although", "Because", "So", "Therefore"],
+            answer: 0,
+            explain: "Hai vế mang nghĩa tương phản (vất vả >< xứng đáng) -> dùng liên từ nhượng bộ 'Although' (Mặc dù)."
+          },
+          {
+            q: "Coding is ______ an interesting skill that many teens want to become software engineers.",
+            options: ["such", "so", "although", "because"],
+            answer: 0,
+            explain: "Phía sau có cụm danh từ 'an interesting skill' -> dùng cấu trúc 'such + a/an + adj + N + that'."
+          },
+          {
+            q: "The mechanic worked ______ skillfully that he fixed the motorbike in 15 minutes.",
+            options: ["so", "such", "though", "since"],
+            answer: 0,
+            explain: "Phía sau là trạng từ 'skillfully' -> dùng cấu trúc 'so + adv + that'."
+          },
+          {
+            q: "______ Nam loves working with machines, he decided to attend a vocational school.",
+            options: ["Since", "Although", "Though", "So"],
+            answer: 0,
+            explain: "'Since' ở đầu câu mang nghĩa 'Bởi vì' (chỉ nguyên nhân), tương đương với 'Because'."
+          },
+          {
+            q: "______ she was tired after a long shift, the garment worker still smiled warmly.",
+            options: ["Though", "Because", "Since", "Such"],
+            answer: 0,
+            explain: "'Though' = 'Although' (Mặc dù), diễn tả sự tương phản giữa hai mệnh đề."
+          }
+        ],
+        sentences: [
+          { hint: "Mặc dù công việc này đòi hỏi cao, nó rất bổ ích.", words: ["Although", "this", "job", "is", "demanding,", "it", "is", "very", "rewarding."] },
+          { hint: "Anh ấy quyết đoán đến nỗi mọi người đều tin tưởng anh ấy.", words: ["He", "is", "so", "decisive", "that", "everyone", "trusts", "him."] },
+          { hint: "Bởi vì cô ấy yêu thích công nghệ, cô ấy muốn làm kỹ sư phần mềm.", words: ["Since", "she", "loves", "technology,", "she", "wants", "to", "be", "a", "software", "engineer."] }
+        ],
+        bossQuestions: [
+          {
+            q: "A ______ is someone whose job is to repair engines and vehicles.",
+            options: ["mechanic", "bartender", "counsellor", "artisan"],
+            answer: 0,
+            explain: "Mechanic: thợ sửa chữa máy móc, ô tô, xe máy."
+          },
+          {
+            q: "It was ______ a demanding project that the software engineers worked all weekend.",
+            options: ["such", "so", "although", "since"],
+            answer: 0,
+            explain: "Cấu trúc: such + a + adj (demanding) + N (project) + that."
+          },
+          {
+            q: "______ vocational training focuses on practical skills, students can find jobs quickly.",
+            options: ["Because", "Although", "Though", "However"],
+            answer: 0,
+            explain: "'Because' diễn tả nguyên nhân – kết quả hợp logic."
+          },
+          {
+            q: "A job that gives you deep satisfaction because you are doing something useful is ______.",
+            options: ["rewarding", "ruinous", "congested", "embarrassing"],
+            answer: 0,
+            explain: "Rewarding: mang lại niềm vui, xứng đáng với công sức bỏ ra."
+          }
+        ]
+      }
+    ];
+
+    /**
+     * ============================================================================
+     * 4. SHOP ITEMS & ACHIEVEMENTS CONFIG
+     * ============================================================================
+     */
+    const SHOP_ITEMS = [
+      {
+        id: "refill_heart",
+        name: "Bình Máu Hồi Sinh",
+        desc: "Hồi phục ngay +1 Tim để tiếp tục chinh phục thử thách.",
+        icon: "❤️",
+        price: 30,
+        type: "heart"
+      },
+      {
+        id: "full_hearts",
+        name: "Trái Tim Bất Tử",
+        desc: "Hồi đầy tối đa 5/5 Tim ngay lập tức.",
+        icon: "💖",
+        price: 100,
+        type: "full_heart"
+      },
+      {
+        id: "hint_pack",
+        name: "Cuộn Giấy Gợi Ý (x2)",
+        desc: "Nhận thêm 2 lượt gợi ý 50/50 trong đấu trường Ngữ pháp & Boss.",
+        icon: "💡",
+        price: 40,
+        type: "hint"
+      },
+      {
+        id: "xp_boost",
+        name: "Thuốc Nhân Đôi XP",
+        desc: "Nhận ngay +80 XP để thăng cấp thần tốc!",
+        icon: "🧪",
+        price: 60,
+        type: "xp"
+      }
+    ];
+
+    const EXTRA_BADGES = [
+      { id: "first_step", name: "Khởi Đầu Hành Trình", icon: "🌱", desc: "Hoàn thành chặng thử thách đầu tiên." },
+      { id: "semester_1", name: "Chinh Phục Học Kỳ I", icon: "📘", desc: "Đánh bại toàn bộ Boss từ Unit 1 đến Unit 6." },
+      { id: "semester_2", name: "Chinh Phục Học Kỳ II", icon: "📕", desc: "Đánh bại toàn bộ Boss từ Unit 7 đến Unit 12." },
+      { id: "rich_scholar", name: "Triệu Phú Tri Thức", icon: "💰", desc: "Tích lũy được từ 200 Xu vàng trở lên." },
+      { id: "level_5", name: "Chiến Binh Cấp 5", icon: "⚔️", desc: "Đạt đến Cấp độ 5 (Level 5)." }
+    ];
+
+    /**
+     * ============================================================================
+     * 5. MAIN GAME ENGINE & STATE MANAGEMENT
+     * ============================================================================
+     */
+    function createInitialUnitProgress() {
+      const prog = {};
+      for (let i = 1; i <= 12; i++) {
+        prog[i] = [false, false, false, false];
+      }
+      return prog;
+    }
+
+    const DEFAULT_STATE = {
+      xp: 0,
+      level: 1,
+      coins: 80,
+      hearts: 5,
+      maxHearts: 5,
+      hints: 3,
+      streak: 1,
+      lastLogin: new Date().toDateString(),
+      sound: true,
+      freeMode: false, // Allows unlocking all 12 units immediately if desired
+      unitProgress: createInitialUnitProgress(),
+      unlockedUnits: [1],
+      badges: []
+    };
+
+    class English9Game {
+      constructor() {
+        this.state = this.loadState();
+        this.currentTab = 'map';
+        this.semesterFilter = 'all'; // 'all' | '1' | '2'
+        this.activeSession = null; // Holds current stage game state
+        this.timerInterval = null;
+        this.init();
+      }
+
+      loadState() {
+        try {
+          const saved = localStorage.getItem('eng9_adventure_save_v2');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            const mergedProgress = createInitialUnitProgress();
+            if (parsed.unitProgress) {
+              for (let i = 1; i <= 12; i++) {
+                if (Array.isArray(parsed.unitProgress[i])) {
+                  mergedProgress[i] = parsed.unitProgress[i];
+                }
+              }
+            }
+            return {
+              ...DEFAULT_STATE,
+              ...parsed,
+              unitProgress: mergedProgress
+            };
+          }
+        } catch (e) {}
+        return JSON.parse(JSON.stringify(DEFAULT_STATE));
+      }
+
+      saveState() {
+        try {
+          localStorage.setItem('eng9_adventure_save_v2', JSON.stringify(this.state));
+        } catch (e) {}
+        this.updateHUD();
+      }
+
+      init() {
+        // Check streak
+        const today = new Date().toDateString();
+        if (this.state.lastLogin !== today) {
+          this.state.streak += 1;
+          this.state.lastLogin = today;
+          if (this.state.hearts < this.state.maxHearts) {
+            this.state.hearts = this.state.maxHearts; // Daily heart refill
+          }
+        }
+        sfx.enabled = this.state.sound;
+        document.getElementById('btn-sound').textContent = this.state.sound ? '🔊' : '🔇';
+        this.saveState();
+        this.render();
+      }
+
+      toggleSound() {
+        this.state.sound = !this.state.sound;
+        sfx.enabled = this.state.sound;
+        document.getElementById('btn-sound').textContent = this.state.sound ? '🔊' : '🔇';
+        if (this.state.sound) sfx.click();
+        this.saveState();
+      }
+
+      updateHUD() {
+        const xpNeeded = this.state.level * 100;
+        const pct = Math.min(100, Math.round((this.state.xp / xpNeeded) * 100));
+        document.getElementById('hud-level').textContent = `Lv.${this.state.level}`;
+        document.getElementById('hud-xp-bar').style.width = `${pct}%`;
+        document.getElementById('hud-xp-text').textContent = `${this.state.xp}/${xpNeeded} XP`;
+        document.getElementById('hud-streak').textContent = this.state.streak;
+        document.getElementById('hud-coins').textContent = this.state.coins;
+        document.getElementById('hud-hearts').textContent = this.state.hearts;
+      }
+
+      addXP(amount) {
+        this.state.xp += amount;
+        let leveledUp = false;
+        while (this.state.xp >= this.state.level * 100) {
+          this.state.xp -= this.state.level * 100;
+          this.state.level += 1;
+          this.state.coins += 25;
+          leveledUp = true;
+        }
+        if (this.state.level >= 5) this.unlockBadge('level_5');
+        if (leveledUp) {
+          sfx.levelUp();
+          this.showToast(`🎉 Thăng cấp! Bạn đã đạt Level ${this.state.level} (+25 Xu)`, '⭐');
+        }
+        this.saveState();
+      }
+
+      addCoins(amount) {
+        this.state.coins += amount;
+        if (this.state.coins >= 200) this.unlockBadge('rich_scholar');
+        this.saveState();
+      }
+      setSemesterFilter(filter) {
+        sfx.click();
+        this.semesterFilter = filter;
+        this.render();
+      }
+
+      toggleFreeMode() {
+        sfx.click();
+        this.state.freeMode = !this.state.freeMode;
+        this.saveState();
+        this.showToast(
+          this.state.freeMode
+            ? '🔓 Đã bật Chế độ tự do: Mở khóa tất cả 12 Unit!'
+            : '🗺️ Đã chuyển về Chế độ phiêu lưu tuần tự!',
+          '✨'
+        );
+        this.render();
+      }
+
+      renderMap(container) {
+        const totalStages = UNITS_DATA.length * 4; // 48 stages
+        let completedStages = 0;
+        Object.values(this.state.unitProgress).forEach(arr => {
+          completedStages += arr.filter(Boolean).length;
+        });
+        const overallPct = Math.round((completedStages / totalStages) * 100);
+
+        const filteredUnits = UNITS_DATA.filter(u => {
+          if (this.semesterFilter === '1') return u.semester === 1;
+          if (this.semesterFilter === '2') return u.semester === 2;
+          return true;
+        });
+
+        let html = `
+          <!-- Adventure Banner -->
+          <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-5 sm:p-6 text-white shadow-lg mb-5 relative overflow-hidden">
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span class="inline-block bg-white/20 backdrop-blur-sm text-xs font-extrabold px-3 py-1 rounded-full mb-2">
+                  🗺️ TRỌN BỘ 12 UNIT • TIẾNG ANH 9 GLOBAL SUCCESS
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black tracking-tight">Bản Đồ Chinh Phục Tiếng Anh 9</h2>
+                <p class="text-white/90 text-sm font-semibold mt-1">Học từ vựng, ngữ pháp, ghép câu và đánh bại Boss qua đủ 12 Unit SGK!</p>
+              </div>
+              <div class="bg-white/15 backdrop-blur-md rounded-2xl p-3.5 min-w-[160px] border border-white/20">
+                <div class="flex justify-between text-xs font-extrabold mb-1">
+                  <span>Tiến độ 12 Unit</span>
+                  <span>${overallPct}%</span>
+                </div>
+                <div class="w-full h-2.5 bg-black/25 rounded-full overflow-hidden">
+                  <div class="h-full bg-amber-300 rounded-full transition-all duration-500" style="width: ${overallPct}%"></div>
+                </div>
+                <div class="text-[11px] font-bold text-white/80 mt-1.5">${completedStages}/${totalStages} chặng hoàn thành</div>
+              </div>
+            </div>
+            <div class="absolute -right-6 -bottom-8 text-8xl opacity-15 pointer-events-none">🧭</div>
+          </div>
+
+          <!-- Filter & Free Mode Bar -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6 bg-white p-3 rounded-2xl border-2 border-slate-200 shadow-sm">
+            <div class="flex items-center gap-1.5 overflow-x-auto">
+              <button onclick="app.setSemesterFilter('all')" class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap ${this.semesterFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                📚 Tất cả (12 Unit)
+              </button>
+              <button onclick="app.setSemesterFilter('1')" class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap ${this.semesterFilter === '1' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                📘 Học kỳ I (Unit 1–6)
+              </button>
+              <button onclick="app.setSemesterFilter('2')" class="px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap ${this.semesterFilter === '2' ? 'bg-sky-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                📕 Học kỳ II (Unit 7–12)
+              </button>
+            </div>
+
+            <button onclick="app.toggleFreeMode()" class="px-3.5 py-2 rounded-xl text-xs font-black border-2 transition flex items-center justify-center gap-1.5 ${this.state.freeMode ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}" title="Bật để học ngay bất kỳ Unit nào mà không cần mở khóa tuần tự">
+              <span>${this.state.freeMode ? '🔓 Đang mở tự do 12 Unit' : '🔒 Mở khóa tất cả Unit'}</span>
+            </button>
+          </div>
+
+          <!-- Units Adventure Path -->
+          <div class="space-y-6">
+        `;
+
+        filteredUnits.forEach((unit) => {
+          const isUnlocked = this.state.freeMode || this.state.unlockedUnits.includes(unit.id);
+          const progress = this.state.unitProgress[unit.id] || [false, false, false, false];
+          const doneCount = progress.filter(Boolean).length;
+          const isUnitComplete = doneCount === 4;
+
+          // Star rating: 0 to 3 stars based on completed stages
+          const stars = doneCount === 4 ? 3 : doneCount >= 2 ? 2 : doneCount >= 1 ? 1 : 0;
+          const starsHtml = [1, 2, 3].map(n => `<span class="${n <= stars ? 'text-amber-300' : 'text-white/30'}">★</span>`).join('');
+
+          const stageMeta = [
+            { idx: 0, title: "Kho Báu Từ Vựng", sub: `${unit.vocab.length} từ & Ghép cặp`, icon: "💎", unlocked: isUnlocked },
+            { idx: 1, title: "Đấu Trường Ngữ Pháp", sub: "Lý thuyết & 5 câu hỏi", icon: "⚔️", unlocked: isUnlocked && (this.state.freeMode || progress[0]) },
+            { idx: 2, title: "Thử Thách Ghép Câu", sub: "Sắp xếp câu chuẩn SGK", icon: "🧩", unlocked: isUnlocked && (this.state.freeMode || progress[1]) },
+            { idx: 3, title: `Boss: ${unit.bossName}`, sub: "Đấu Boss tổng hợp", icon: unit.bossIcon, unlocked: isUnlocked && (this.state.freeMode || progress[2]) }
+          ];
+
+          html += `
+            <div class="bg-white rounded-3xl border-2 ${isUnlocked ? 'border-slate-200 shadow-md' : 'border-slate-200/70 opacity-75'} overflow-hidden transition-all">
+              <!-- Unit Header -->
+              <div class="bg-gradient-to-r ${isUnlocked ? unit.gradient : 'from-slate-400 to-slate-500'} p-4 sm:p-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3.5">
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
+                    ${isUnlocked ? unit.icon : '🔒'}
+                  </div>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="text-xs font-black uppercase tracking-wider bg-black/25 px-2.5 py-0.5 rounded-lg">${unit.code} • HK${unit.semester}</span>
+                      <span class="text-xs font-bold bg-white/20 px-2.5 py-0.5 rounded-lg">🎯 ${unit.grammarTag}</span>
+                      ${isUnitComplete ? '<span class="text-xs font-black bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-lg">✔ HOÀN THÀNH</span>' : ''}
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-black mt-1">${unit.title} <span class="font-bold text-white/85 text-sm sm:text-base">— ${unit.viTitle}</span></h3>
+                  </div>
+                </div>
+                <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0">
+                  <div class="text-lg tracking-widest leading-none">${starsHtml}</div>
+                  <div class="text-xs font-extrabold bg-black/20 px-3 py-1 rounded-xl">
+                    ${doneCount}/4 Chặng
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4 Stages Grid -->
+              <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                ${stageMeta.map(st => {
+                  const isDone = progress[st.idx];
+                  const canPlay = st.unlocked;
+                  let cardStyle = "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed";
+                  let badgeHtml = `<span class="text-xs font-extrabold text-slate-400">🔒 Khóa</span>`;
+
+                  if (isDone) {
+                    cardStyle = "bg-emerald-50/70 border-emerald-300 text-slate-800 hover:bg-emerald-50 cursor-pointer";
+                    badgeHtml = `<span class="text-xs font-black text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-lg">✔ Hoàn thành</span>`;
+                  } else if (canPlay) {
+                    cardStyle = "bg-white border-sky-300 text-slate-800 hover:border-sky-400 hover:shadow-md cursor-pointer ring-2 ring-sky-100";
+                    badgeHtml = `<span class="text-xs font-black text-sky-600 bg-sky-100 px-2 py-0.5 rounded-lg">▶ Chơi ngay</span>`;
+                  }
+
+                  return `
+                    <div onclick="${canPlay ? `app.startStage(${unit.id}, ${st.idx})` : `app.showLockedHint(${isUnlocked})`}"
+                         class="rounded-2xl border-2 p-3.5 flex flex-col justify-between transition-all ${cardStyle}">
+                      <div class="flex items-start justify-between gap-2 mb-2">
+                        <span class="text-2xl ${canPlay ? '' : 'grayscale opacity-50'}">${st.icon}</span>
+                        ${badgeHtml}
+                      </div>
+                      <div>
+                        <div class="font-extrabold text-sm leading-snug">${st.idx + 1}. ${st.title}</div>
+                        <div class="text-xs font-semibold text-slate-500 mt-0.5">${st.sub}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        container.innerHTML = html;
+      }
+
+      showLockedHint(unitUnlocked) {
+        sfx.wrong();
+        if (!unitUnlocked) {
+          this.showToast('Đánh bại Boss Unit trước hoặc bật "Mở khóa tất cả Unit" ở phía trên!', '🔒');
+        } else {
+          this.showToast('Hoàn thành chặng trước hoặc bật "Mở khóa tất cả Unit" để vào thẳng!', '🔒');
+        }
+      }
+
+      clearTimer() {
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          this.timerInterval = null;
+        }
+      }
+
+      switchTab(tab) {
+        sfx.click();
+        this.clearTimer();
+        this.activeSession = null;
+        this.currentTab = tab;
+        document.getElementById('bottom-nav').classList.remove('hidden');
+
+        // Update nav active states
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('text-emerald-600', 'bg-emerald-50');
+          btn.classList.add('text-slate-500');
+        });
+        const activeBtn = document.getElementById(`nav-${tab}`);
+        if (activeBtn) {
+          activeBtn.classList.remove('text-slate-500');
+          activeBtn.classList.add('text-emerald-600', 'bg-emerald-50');
+        }
+
+        this.render();
+      }
+
+      goHome() {
+        this.switchTab('map');
+      }
+
+      showToast(text, icon = '✨') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-text').textContent = text;
+        document.getElementById('toast-icon').textContent = icon;
+        toast.classList.remove('opacity-0', '-translate-y-2');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        clearTimeout(this.toastTimeout);
+        this.toastTimeout = setTimeout(() => {
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', '-translate-y-2');
+        }, 2600);
+      }
+
+      showModal(icon, title, message, buttons) {
+        const overlay = document.getElementById('modal-overlay');
+        document.getElementById('modal-icon').textContent = icon;
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-message').innerHTML = message;
+        const actionsEl = document.getElementById('modal-actions');
+        actionsEl.innerHTML = '';
+        buttons.forEach(b => {
+          const btn = document.createElement('button');
+          btn.className = `btn-3d ${b.class || 'btn-blue'} px-5 py-2.5 rounded-2xl font-extrabold text-sm flex-1`;
+          btn.textContent = b.label;
+          btn.onclick = b.onClick;
+          actionsEl.appendChild(btn);
+        });
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      }
+
+      closeModal() {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+
+      /**
+       * ==========================================================================
+       * 6. RENDER VIEWS (MAP, SHOP, BADGES, PROFILE)
+       * ==========================================================================
+       */
+      render() {
+        const container = document.getElementById('app-container');
+        if (this.activeSession) {
+          this.renderStageSession(container);
+          return;
+        }
+        switch (this.currentTab) {
+          case 'map': this.renderMap(container); break;
+          case 'shop': this.renderShop(container); break;
+          case 'badges': this.renderBadges(container); break;
+          case 'profile': this.renderProfile(container); break;
+        }
+      }
+
+      renderMap(container) {
+        const totalStages = UNITS_DATA.length * 4;
+        let completedStages = 0;
+        Object.values(this.state.unitProgress).forEach(arr => {
+          completedStages += arr.filter(Boolean).length;
+        });
+        const overallPct = Math.round((completedStages / totalStages) * 100);
+
+        let html = `
+          <!-- Adventure Banner -->
+          <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 rounded-3xl p-5 sm:p-6 text-white shadow-lg mb-7 relative overflow-hidden">
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span class="inline-block bg-white/20 backdrop-blur-sm text-xs font-extrabold px-3 py-1 rounded-full mb-2">
+                  🗺️ HÀNH TRÌNH CHINH PHỤC LỚP 9
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black tracking-tight">Bản Đồ Thế Giới Global Success</h2>
+                <p class="text-white/90 text-sm font-semibold mt-1">Hoàn thành 4 chặng mỗi Unit để đánh bại Boss và mở khóa vùng đất mới!</p>
+              </div>
+              <div class="bg-white/15 backdrop-blur-md rounded-2xl p-3.5 min-w-[150px] border border-white/20">
+                <div class="flex justify-between text-xs font-extrabold mb-1">
+                  <span>Tiến độ tổng</span>
+                  <span>${overallPct}%</span>
+                </div>
+                <div class="w-full h-2.5 bg-black/25 rounded-full overflow-hidden">
+                  <div class="h-full bg-amber-300 rounded-full transition-all duration-500" style="width: ${overallPct}%"></div>
+                </div>
+                <div class="text-[11px] font-bold text-white/80 mt-1.5">${completedStages}/${totalStages} chặng hoàn thành</div>
+              </div>
+            </div>
+            <div class="absolute -right-6 -bottom-8 text-8xl opacity-15 pointer-events-none">🧭</div>
+          </div>
+
+          <!-- Units Adventure Path -->
+          <div class="space-y-6">
+        `;
+
+        UNITS_DATA.forEach((unit) => {
+          const isUnlocked = this.state.unlockedUnits.includes(unit.id);
+          const progress = this.state.unitProgress[unit.id] || [false, false, false, false];
+          const doneCount = progress.filter(Boolean).length;
+          const isUnitComplete = doneCount === 4;
+
+          const stageMeta = [
+            { idx: 0, title: "Kho Báu Từ Vựng", sub: "Flashcards & Ghép cặp", icon: "💎", unlocked: isUnlocked },
+            { idx: 1, title: "Đấu Trường Ngữ Pháp", sub: "Lý thuyết & Trắc nghiệm", icon: "⚔️", unlocked: isUnlocked && progress[0] },
+            { idx: 2, title: "Thử Thách Ghép Câu", sub: "Sắp xếp câu chuẩn SGK", icon: "🧩", unlocked: isUnlocked && progress[1] },
+            { idx: 3, title: `Boss: ${unit.bossName}`, sub: "Đấu Boss tính giờ", icon: unit.bossIcon, unlocked: isUnlocked && progress[2] }
+          ];
+
+          html += `
+            <div class="bg-white rounded-3xl border-2 ${isUnlocked ? 'border-slate-200 shadow-md' : 'border-slate-200/70 opacity-75'} overflow-hidden transition-all">
+              <!-- Unit Header -->
+              <div class="bg-gradient-to-r ${isUnlocked ? unit.gradient : 'from-slate-400 to-slate-500'} p-4 sm:p-5 text-white flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3.5">
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl sm:text-3xl shadow-inner">
+                    ${isUnlocked ? unit.icon : '🔒'}
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-black uppercase tracking-wider bg-black/20 px-2.5 py-0.5 rounded-lg">${unit.code}</span>
+                      ${isUnitComplete ? '<span class="text-xs font-black bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-lg">★ ĐÃ CHINH PHỤC</span>' : ''}
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-black mt-0.5">${unit.title}</h3>
+                    <p class="text-xs sm:text-sm font-bold text-white/90">${unit.viTitle}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-extrabold bg-white/20 px-3 py-1.5 rounded-xl">
+                    ${doneCount}/4 Chặng
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4 Stages Grid -->
+              <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                ${stageMeta.map(st => {
+                  const isDone = progress[st.idx];
+                  const canPlay = st.unlocked;
+                  let cardStyle = "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed";
+                  let badgeHtml = `<span class="text-xs font-extrabold text-slate-400">🔒 Khóa</span>`;
+
+                  if (isDone) {
+                    cardStyle = "bg-emerald-50/70 border-emerald-300 text-slate-800 hover:bg-emerald-50 cursor-pointer";
+                    badgeHtml = `<span class="text-xs font-black text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-lg">✔ Hoàn thành</span>`;
+                  } else if (canPlay) {
+                    cardStyle = "bg-white border-sky-300 text-slate-800 hover:border-sky-400 hover:shadow-md cursor-pointer ring-2 ring-sky-100";
+                    badgeHtml = `<span class="text-xs font-black text-sky-600 bg-sky-100 px-2 py-0.5 rounded-lg animate-pulse">▶ Chơi ngay</span>`;
+                  }
+
+                  return `
+                    <div onclick="${canPlay ? `app.startStage(${unit.id}, ${st.idx})` : `app.showLockedHint(${isUnlocked})`}"
+                         class="rounded-2xl border-2 p-3.5 flex flex-col justify-between transition-all ${cardStyle}">
+                      <div class="flex items-start justify-between gap-2 mb-2">
+                        <span class="text-2xl ${canPlay ? '' : 'grayscale opacity-50'}">${st.icon}</span>
+                        ${badgeHtml}
+                      </div>
+                      <div>
+                        <div class="font-extrabold text-sm leading-snug">${st.idx + 1}. ${st.title}</div>
+                        <div class="text-xs font-semibold text-slate-500 mt-0.5">${st.sub}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        container.innerHTML = html;
+      }
+
+      showLockedHint(unitUnlocked) {
+        sfx.wrong();
+        if (!unitUnlocked) {
+          this.showToast('Hãy đánh bại Boss ở Unit trước để mở khóa Unit này!', '🔒');
+        } else {
+          this.showToast('Hãy hoàn thành chặng trước đó để mở chặng này!', '🔒');
+        }
+      }
+
+      renderShop(container) {
+        container.innerHTML = `
+          <div class="mb-6">
+            <h2 class="text-2xl font-black text-slate-800 flex items-center gap-2">
+              <span>🏪</span> Cửa Hàng Vật Phẩm
+            </h2>
+            <p class="text-sm font-semibold text-slate-500 mt-1">Sử dụng Xu vàng kiếm được từ các bài học để mua vật phẩm hỗ trợ.</p>
+          </div>
+
+          <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">💰</span>
+              <div>
+                <div class="text-xs font-bold text-amber-700 uppercase">Túi đồ hiện tại</div>
+                <div class="font-black text-slate-800 text-base">
+                  ${this.state.coins} Xu vàng &nbsp;•&nbsp; ${this.state.hearts}/${this.state.maxHearts} Tim &nbsp;•&nbsp; ${this.state.hints} Thẻ gợi ý 💡
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            ${SHOP_ITEMS.map(item => `
+              <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 flex flex-col justify-between shadow-sm">
+                <div class="flex items-start gap-4 mb-4">
+                  <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-3xl shrink-0">
+                    ${item.icon}
+                  </div>
+                  <div>
+                    <h3 class="font-black text-base text-slate-800">${item.name}</h3>
+                    <p class="text-xs font-semibold text-slate-500 mt-1 leading-relaxed">${item.desc}</p>
+                  </div>
+                </div>
+                <button onclick="app.buyItem('${item.id}')" class="btn-3d btn-amber w-full py-2.5 rounded-2xl font-black text-sm flex items-center justify-center gap-1.5">
+                  <span>Mua ngay:</span>
+                  <span>🪙 ${item.price}</span>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      buyItem(itemId) {
+        const item = SHOP_ITEMS.find(i => i.id === itemId);
+        if (!item) return;
+
+        if (this.state.coins < item.price) {
+          sfx.wrong();
+          this.showToast('Bạn không đủ Xu vàng! Hãy làm thêm bài tập để kiếm Xu nhé.', '🪙');
+          return;
+        }
+
+        if ((item.type === 'heart' || item.type === 'full_heart') && this.state.hearts >= this.state.maxHearts) {
+          sfx.wrong();
+          this.showToast('Số tim của bạn đã đầy (5/5) rồi!', '❤️');
+          return;
+        }
+
+        this.state.coins -= item.price;
+        sfx.coin();
+
+        if (item.type === 'heart') {
+          this.state.hearts = Math.min(this.state.maxHearts, this.state.hearts + 1);
+          this.showToast('Đã hồi phục +1 Tim!', '❤️');
+        } else if (item.type === 'full_heart') {
+          this.state.hearts = this.state.maxHearts;
+          this.showToast('Đã hồi đầy 5/5 Tim!', '💖');
+        } else if (item.type === 'hint') {
+          this.state.hints += 2;
+          this.showToast('Đã nhận +2 Thẻ gợi ý 50/50!', '💡');
+        } else if (item.type === 'xp') {
+          this.addXP(80);
+          this.showToast('Đã nhận +80 XP!', '🧪');
+        }
+
+        this.saveState();
+        this.render();
+      }
+
+      renderBadges(container) {
+        const allBadges = [
+          ...UNITS_DATA.map(u => u.badge),
+          ...EXTRA_BADGES
+        ];
+
+        container.innerHTML = `
+          <div class="mb-6">
+            <h2 class="text-2xl font-black text-slate-800 flex items-center gap-2">
+              <span>🏆</span> Phòng Trưng Bày Huy Hiệu
+            </h2>
+            <p class="text-sm font-semibold text-slate-500 mt-1">Đã mở khóa ${this.state.badges.length}/${allBadges.length} huy hiệu danh giá.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            ${allBadges.map(b => {
+              const unlocked = this.state.badges.includes(b.id);
+              return `
+                <div class="rounded-3xl border-2 p-5 text-center transition-all ${unlocked ? 'bg-white border-amber-300 shadow-md' : 'bg-slate-100/80 border-slate-200 opacity-65'}">
+                  <div class="w-16 h-16 mx-auto rounded-2xl ${unlocked ? 'bg-amber-100 animate-float' : 'bg-slate-200 grayscale'} flex items-center justify-center text-4xl mb-3">
+                    ${b.icon}
+                  </div>
+                  <div class="inline-block text-[11px] font-black px-2.5 py-0.5 rounded-full mb-1.5 ${unlocked ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}">
+                    ${unlocked ? 'ĐÃ ĐẠT ĐƯỢC' : 'CHƯA MỞ KHÓA'}
+                  </div>
+                  <h3 class="font-black text-base text-slate-800">${b.name}</h3>
+                  <p class="text-xs font-semibold text-slate-500 mt-1">${b.desc}</p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      renderProfile(container) {
+        let totalWords = 0;
+        UNITS_DATA.forEach(u => {
+          if (this.state.unitProgress[u.id]?.[0]) totalWords += u.vocab.length;
+        });
+
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-sm mb-6">
+            <div class="flex flex-col sm:flex-row items-center gap-5">
+              <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-4xl text-white shadow-md">
+                🧑‍🎓
+              </div>
+              <div class="text-center sm:text-left flex-1">
+                <div class="inline-block bg-indigo-100 text-indigo-700 font-black text-xs px-3 py-1 rounded-full mb-1">
+                  HỌC VIÊN LỚP 9 • LEVEL ${this.state.level}
+                </div>
+                <h2 class="text-2xl font-black text-slate-800">Nhà Thám Hiểm Ngôn Ngữ</h2>
+                <p class="text-sm font-semibold text-slate-500">Chương trình Tiếng Anh 9 - Global Success</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t-2 border-slate-100">
+              <div class="bg-slate-50 p-3.5 rounded-2xl text-center">
+                <div class="text-2xl font-black text-indigo-600">Lv.${this.state.level}</div>
+                <div class="text-xs font-bold text-slate-500 mt-0.5">Cấp độ hiện tại</div>
+              </div>
+              <div class="bg-slate-50 p-3.5 rounded-2xl text-center">
+                <div class="text-2xl font-black text-orange-500">🔥 ${this.state.streak}</div>
+                <div class="text-xs font-bold text-slate-500 mt-0.5">Chuỗi ngày học</div>
+              </div>
+              <div class="bg-slate-50 p-3.5 rounded-2xl text-center">
+                <div class="text-2xl font-black text-emerald-600">${totalWords}</div>
+                <div class="text-xs font-bold text-slate-500 mt-0.5">Từ vựng đã thuộc</div>
+              </div>
+              <div class="bg-slate-50 p-3.5 rounded-2xl text-center">
+                <div class="text-2xl font-black text-amber-500">${this.state.badges.length}</div>
+                <div class="text-xs font-bold text-slate-500 mt-0.5">Huy hiệu đạt được</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-sm">
+            <h3 class="font-black text-base text-slate-800 mb-2">⚙️ Cài đặt dữ liệu học tập</h3>
+            <p class="text-xs font-semibold text-slate-500 mb-4">Tiến độ của bạn được tự động lưu trên trình duyệt này. Nếu muốn bắt đầu lại từ đầu, bạn có thể đặt lại dữ liệu.</p>
+            <button onclick="app.confirmReset()" class="btn-3d btn-red px-5 py-2.5 rounded-2xl font-extrabold text-sm">
+              🗑️ Đặt lại toàn bộ tiến trình
+            </button>
+          </div>
+        `;
+      }
+
+      confirmReset() {
+        sfx.click();
+        this.showModal(
+          '⚠️',
+          'Đặt lại tiến trình?',
+          'Toàn bộ cấp độ, xu vàng, huy hiệu và các Unit đã mở khóa sẽ quay về ban đầu. Bạn có chắc chắn không?',
+          [
+            { label: 'Hủy bỏ', class: 'btn-white', onClick: () => this.closeModal() },
+            {
+              label: 'Đồng ý đặt lại',
+              class: 'btn-red',
+              onClick: () => {
+                localStorage.removeItem('eng9_adventure_save_v2');
+                this.state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                this.saveState();
+                this.closeModal();
+                this.switchTab('map');
+                this.showToast('Đã đặt lại tiến trình về ban đầu!', '🔄');
+              }
+            }
+          ]
+        );
+      }
+
+      /**
+       * ==========================================================================
+       * 7. STAGE GAMEPLAY CONTROLLERS (4 STAGES PER UNIT)
+       * ==========================================================================
+       */
+      startStage(unitId, stageIdx) {
+        if (this.state.hearts <= 0) {
+          sfx.wrong();
+          this.showModal(
+            '💔',
+            'Bạn đã hết Tim!',
+            'Cần ít nhất 1 Tim để tham gia thử thách. Hãy ghé Cửa hàng để hồi phục tim bằng Xu vàng nhé!',
+            [
+              { label: 'Để sau', class: 'btn-white', onClick: () => this.closeModal() },
+              { label: 'Mở Cửa Hàng', class: 'btn-amber', onClick: () => { this.closeModal(); this.switchTab('shop'); } }
+            ]
+          );
+          return;
+        }
+
+        sfx.click();
+        const unit = UNITS_DATA.find(u => u.id === unitId);
+        document.getElementById('bottom-nav').classList.add('hidden');
+
+        if (stageIdx === 0) {
+          // Stage 1: Vocabulary Flashcards + Matching Mini-game (6 random pairs from 8 words)
+          const pairs = [...unit.vocab].sort(() => Math.random() - 0.5).slice(0, 6);
+          const leftItems = pairs.map((v, i) => ({ id: i, text: v.word })).sort(() => Math.random() - 0.5);
+          const rightItems = pairs.map((v, i) => ({ id: i, text: v.meaning })).sort(() => Math.random() - 0.5);
+
+          this.activeSession = {
+            unit,
+            stageIdx: 0,
+            phase: 'flashcards', // 'flashcards' -> 'matching'
+            cardIdx: 0,
+            flipped: false,
+            leftItems,
+            rightItems,
+            selectedLeft: null,
+            selectedRight: null,
+            matchedIds: []
+          };
+        } else if (stageIdx === 1) {
+          // Stage 2: Grammar Quest (Theory + Quiz)
+          this.activeSession = {
+            unit,
+            stageIdx: 1,
+            phase: 'theory', // 'theory' -> 'quiz'
+            qIdx: 0,
+            combo: 0,
+            selectedOption: null,
+            isAnswered: false,
+            hiddenOptions: []
+          };
+        } else if (stageIdx === 2) {
+          // Stage 3: Sentence Builder
+          const sentences = unit.sentences.map(s => ({
+            ...s,
+            shuffled: [...s.words].sort(() => Math.random() - 0.5)
+          }));
+          this.activeSession = {
+            unit,
+            stageIdx: 2,
+            sIdx: 0,
+            sentences,
+            chosenIndices: [],
+            isChecked: false,
+            isCorrect: false
+          };
+        } else if (stageIdx === 3) {
+          // Stage 4: Boss Challenge (Timed Quiz with Combo)
+          this.activeSession = {
+            unit,
+            stageIdx: 3,
+            qIdx: 0,
+            combo: 0,
+            timeLeft: 75,
+            bossHp: 100,
+            selectedOption: null,
+            isAnswered: false,
+            hiddenOptions: []
+          };
+          this.startBossTimer();
+        }
+
+        this.render();
+      }
+
+      startBossTimer() {
+        this.clearTimer();
+        this.timerInterval = setInterval(() => {
+          if (!this.activeSession || this.activeSession.stageIdx !== 3) {
+            this.clearTimer();
+            return;
+          }
+          this.activeSession.timeLeft -= 1;
+          const timerEl = document.getElementById('boss-timer');
+          if (timerEl) {
+            timerEl.textContent = `${this.activeSession.timeLeft}s`;
+            if (this.activeSession.timeLeft <= 10) timerEl.classList.add('text-rose-600', 'animate-pulse');
+          }
+          if (this.activeSession.timeLeft <= 0) {
+            this.clearTimer();
+            sfx.wrong();
+            this.showModal(
+              '⏰',
+              'Hết Giờ Đấu Boss!',
+              `${this.activeSession.unit.bossName} đã trốn thoát vì hết thời gian. Hãy thử lại và trả lời nhanh hơn nhé!`,
+              [{ label: 'Quay về Bản Đồ', class: 'btn-blue', onClick: () => { this.closeModal(); this.goHome(); } }]
+            );
+          }
+        }, 1000);
+      }
+
+      renderStageSession(container) {
+        const s = this.activeSession;
+        const unit = s.unit;
+
+        // Top Stage Header with Exit button
+        let html = `
+          <div class="flex items-center justify-between gap-3 mb-5">
+            <button onclick="app.exitStage()" class="btn-3d btn-white px-3.5 py-2 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center gap-1">
+              ✕ Thoát
+            </button>
+            <div class="text-center">
+              <span class="text-xs font-black uppercase text-slate-400">${unit.code}: ${unit.title}</span>
+              <h2 class="font-black text-base sm:text-lg text-slate-800">
+                ${['💎 Kho Báu Từ Vựng', '⚔️ Đấu Trường Ngữ Pháp', '🧩 Thử Thách Ghép Câu', `${unit.bossIcon} Đấu Boss: ${unit.bossName}`][s.stageIdx]}
+              </h2>
+            </div>
+            <div class="w-16 text-right font-black text-sm text-rose-500">
+              ❤️ ${this.state.hearts}
+            </div>
+          </div>
+        `;
+
+        if (s.stageIdx === 0) html += this.renderStage1Vocab(s);
+        else if (s.stageIdx === 1) html += this.renderStage2Grammar(s);
+        else if (s.stageIdx === 2) html += this.renderStage3Sentence(s);
+        else if (s.stageIdx === 3) html += this.renderStage4Boss(s);
+
+        container.innerHTML = html;
+      }
+
+      exitStage() {
+        sfx.click();
+        this.clearTimer();
+        this.goHome();
+      }
+
+      /**
+       * --- STAGE 1: VOCABULARY FLASHCARDS & MATCHING ---
+       */
+      renderStage1Vocab(s) {
+        if (s.phase === 'flashcards') {
+          const vocabList = s.unit.vocab;
+          const item = vocabList[s.cardIdx];
+          const progressPct = Math.round(((s.cardIdx + 1) / vocabList.length) * 100);
+
+          return `
+            <div class="max-w-lg mx-auto">
+              <!-- Progress -->
+              <div class="flex items-center gap-3 mb-4">
+                <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${progressPct}%"></div>
+                </div>
+                <span class="text-xs font-black text-slate-500">Thẻ ${s.cardIdx + 1}/${vocabList.length}</span>
+              </div>
+
+              <!-- Flashcard -->
+              <div onclick="app.flipCard()" class="perspective-1000 cursor-pointer h-80 sm:h-88 mb-5">
+                <div class="relative w-full h-full transform-style-3d ${s.flipped ? 'rotate-y-180' : ''}">
+                  <!-- Front -->
+                  <div class="absolute inset-0 backface-hidden bg-white rounded-3xl border-2 border-slate-200 shadow-lg p-6 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full mb-4">NHẤN ĐỂ LẬT THẺ 🔄</span>
+                    <h3 class="text-3xl sm:text-4xl font-black text-slate-800 mb-2">${item.word}</h3>
+                    <div class="text-base font-bold text-slate-400 mb-5">${item.ipa} <span class="text-indigo-500">${item.type}</span></div>
+                    <button onclick="event.stopPropagation(); speakEnglish('${item.word.replace(/'/g, "\\'")}')" class="btn-3d btn-blue px-5 py-2.5 rounded-2xl font-extrabold text-sm flex items-center gap-2">
+                      🔊 Nghe phát âm
+                    </button>
+                  </div>
+
+                  <!-- Back -->
+                  <div class="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl border-2 border-emerald-300 shadow-lg p-6 flex flex-col items-center justify-center text-center">
+                    <div class="text-xs font-black text-emerald-700 uppercase mb-1">Nghĩa tiếng Việt</div>
+                    <h3 class="text-2xl sm:text-3xl font-black text-emerald-800 mb-4">${item.meaning}</h3>
+                    <div class="bg-white/90 rounded-2xl p-4 border border-emerald-200 w-full">
+                      <div class="text-xs font-extrabold text-slate-400 mb-1">Ví dụ trong ngữ cảnh:</div>
+                      <p class="text-sm font-bold text-slate-700 italic">"${item.example}"</p>
+                      <button onclick="event.stopPropagation(); speakEnglish('${item.example.replace(/'/g, "\\'")}')" class="mt-2.5 text-xs font-black text-sky-600 hover:underline">
+                        🔊 Đọc câu ví dụ
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div class="flex gap-3">
+                <button onclick="app.prevCard()" ${s.cardIdx === 0 ? 'disabled' : ''} class="btn-3d btn-white px-5 py-3 rounded-2xl font-extrabold text-sm">
+                  ← Trước
+                </button>
+                <button onclick="app.nextCard()" class="btn-3d btn-green flex-1 py-3 rounded-2xl font-black text-sm">
+                  ${s.cardIdx < vocabList.length - 1 ? 'Từ tiếp theo →' : 'Vào Mini-Game Ghép Cặp 🎮'}
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          // Matching Phase
+          return `
+            <div class="max-w-2xl mx-auto">
+              <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3.5 text-center mb-5">
+                <p class="font-extrabold text-sm text-sky-800">🎯 Ghép từ tiếng Anh ở cột trái với nghĩa tiếng Việt tương ứng ở cột phải!</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 sm:gap-5">
+                <!-- Left Column (English) -->
+                <div class="space-y-3">
+                  ${s.leftItems.map(item => {
+                    const isMatched = s.matchedIds.includes(item.id);
+                    const isSelected = s.selectedLeft === item.id;
+                    let cls = "btn-white";
+                    if (isMatched) cls = "bg-emerald-100 border-2 border-emerald-400 text-emerald-700 opacity-50 pointer-events-none";
+                    else if (isSelected) cls = "bg-sky-100 border-2 border-sky-500 text-sky-900 ring-2 ring-sky-200";
+
+                    return `
+                      <button onclick="app.selectMatch('left', ${item.id})" class="btn-3d ${cls} w-full p-3.5 rounded-2xl font-black text-sm sm:text-base text-center">
+                        ${item.text}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Right Column (Vietnamese) -->
+                <div class="space-y-3">
+                  ${s.rightItems.map(item => {
+                    const isMatched = s.matchedIds.includes(item.id);
+                    const isSelected = s.selectedRight === item.id;
+                    let cls = "btn-white";
+                    if (isMatched) cls = "bg-emerald-100 border-2 border-emerald-400 text-emerald-700 opacity-50 pointer-events-none";
+                    else if (isSelected) cls = "bg-sky-100 border-2 border-sky-500 text-sky-900 ring-2 ring-sky-200";
+
+                    return `
+                      <button onclick="app.selectMatch('right', ${item.id})" class="btn-3d ${cls} w-full p-3.5 rounded-2xl font-bold text-xs sm:text-sm text-center">
+                        ${item.text}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      flipCard() {
+        sfx.click();
+        this.activeSession.flipped = !this.activeSession.flipped;
+        this.render();
+      }
+
+      prevCard() {
+        if (this.activeSession.cardIdx > 0) {
+          sfx.click();
+          this.activeSession.cardIdx -= 1;
+          this.activeSession.flipped = false;
+          this.render();
+        }
+      }
+
+      nextCard() {
+        sfx.click();
+        const s = this.activeSession;
+        if (s.cardIdx < s.unit.vocab.length - 1) {
+          s.cardIdx += 1;
+          s.flipped = false;
+        } else {
+          s.phase = 'matching';
+        }
+        this.render();
+      }
+
+      selectMatch(side, id) {
+        const s = this.activeSession;
+        if (s.matchedIds.includes(id)) return;
+
+        if (side === 'left') {
+          s.selectedLeft = id;
+          const wordObj = s.leftItems.find(i => i.id === id);
+          if (wordObj) speakEnglish(wordObj.text);
+        } else {
+          sfx.click();
+          s.selectedRight = id;
+        }
+
+        if (s.selectedLeft !== null && s.selectedRight !== null) {
+          if (s.selectedLeft === s.selectedRight) {
+            sfx.correct();
+            s.matchedIds.push(s.selectedLeft);
+            s.selectedLeft = null;
+            s.selectedRight = null;
+            if (s.matchedIds.length === s.leftItems.length) {
+              setTimeout(() => this.completeStage(30, 15), 400);
+            }
+          } else {
+            sfx.wrong();
+            s.selectedLeft = null;
+            s.selectedRight = null;
+            this.showToast('Chưa khớp rồi, thử lại nhé!', '❌');
+            if (this.loseHeart()) return;
+          }
+        }
+        this.render();
+      }
+
+      /**
+       * --- STAGE 2: GRAMMAR QUEST ---
+       */
+      renderStage2Grammar(s) {
+        if (s.phase === 'theory') {
+          const note = s.unit.grammarNote;
+          return `
+            <div class="max-w-2xl mx-auto bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-md">
+              <div class="inline-block bg-indigo-100 text-indigo-700 font-black text-xs px-3 py-1 rounded-full mb-2">
+                📖 BÍ KÍP NGỮ PHÁP TRỌNG TÂM
+              </div>
+              <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-4">${note.title}</h3>
+              <div class="space-y-3 mb-6">
+                ${note.points.map(p => `
+                  <div class="bg-slate-50 border-l-4 border-indigo-500 p-4 rounded-r-2xl text-sm text-slate-700 leading-relaxed font-medium">
+                    ${p}
+                  </div>
+                `).join('')}
+              </div>
+              <button onclick="app.startGrammarQuiz()" class="btn-3d btn-green w-full py-3.5 rounded-2xl font-black text-base">
+                Đã hiểu bí kíp! Bắt đầu thực chiến ⚔️
+              </button>
+            </div>
+          `;
+        }
+
+        const questions = s.unit.grammarQuiz;
+        const q = questions[s.qIdx];
+        const pct = Math.round(((s.qIdx) / questions.length) * 100);
+
+        return `
+          <div class="max-w-2xl mx-auto">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-indigo-500 transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+              <span class="text-xs font-black text-slate-500">Câu ${s.qIdx + 1}/${questions.length}</span>
+              <button onclick="app.useHint()" ${s.isAnswered || s.hiddenOptions.length > 0 ? 'disabled' : ''} class="btn-3d btn-amber px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1" title="Dùng thẻ gợi ý 50/50">
+                💡 50/50 (${this.state.hints})
+              </button>
+            </div>
+
+            <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-md mb-4">
+              <p class="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed mb-5">${q.q}</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${q.options.map((opt, idx) => {
+                  if (s.hiddenOptions.includes(idx)) {
+                    return `<div class="p-3.5 rounded-2xl border-2 border-dashed border-slate-200 text-slate-300 text-center font-bold text-sm">Đã loại bỏ</div>`;
+                  }
+                  let btnClass = "btn-white";
+                  if (s.isAnswered) {
+                    if (idx === q.answer) btnClass = "btn-green";
+                    else if (idx === s.selectedOption) btnClass = "btn-red";
+                    else btnClass = "btn-white opacity-50";
+                  }
+                  return `
+                    <button onclick="app.answerQuiz(${idx})" ${s.isAnswered ? 'disabled' : ''} class="btn-3d ${btnClass} p-3.5 rounded-2xl font-extrabold text-sm sm:text-base text-left flex items-center gap-2.5">
+                      <span class="w-7 h-7 rounded-lg bg-black/10 flex items-center justify-center text-xs font-black shrink-0">${['A','B','C','D'][idx]}</span>
+                      <span>${opt}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            ${s.isAnswered ? `
+              <div class="rounded-3xl p-4 sm:p-5 border-2 mb-4 animate-pop ${s.selectedOption === q.answer ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300'}">
+                <div class="font-black text-base mb-1 ${s.selectedOption === q.answer ? 'text-emerald-700' : 'text-rose-700'}">
+                  ${s.selectedOption === q.answer ? '🎉 Chính xác!' : '😅 Chưa chính xác rồi!'}
+                </div>
+                <p class="text-sm font-semibold text-slate-700 leading-relaxed mb-4">💡 <b>Giải thích:</b> ${q.explain}</p>
+                <button onclick="app.nextQuizQuestion()" class="btn-3d ${s.selectedOption === q.answer ? 'btn-green' : 'btn-blue'} w-full py-3 rounded-2xl font-black text-sm">
+                  ${s.qIdx < questions.length - 1 ? 'Câu tiếp theo →' : 'Hoàn thành Đấu Trường 🏆'}
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      startGrammarQuiz() {
+        sfx.click();
+        this.activeSession.phase = 'quiz';
+        this.render();
+      }
+
+      useHint() {
+        const s = this.activeSession;
+        if (s.isAnswered || s.hiddenOptions.length > 0) return;
+        if (this.state.hints <= 0) {
+          sfx.wrong();
+          this.showToast('Bạn đã hết Thẻ gợi ý! Có thể mua thêm trong Cửa hàng.', '💡');
+          return;
+        }
+        const questions = s.stageIdx === 1 ? s.unit.grammarQuiz : s.unit.bossQuestions;
+        const q = questions[s.qIdx];
+        const wrongIndices = [0, 1, 2, 3].filter(i => i !== q.answer).sort(() => Math.random() - 0.5);
+        s.hiddenOptions = wrongIndices.slice(0, 2);
+        this.state.hints -= 1;
+        sfx.coin();
+        this.saveState();
+        this.render();
+      }
+
+      answerQuiz(idx) {
+        const s = this.activeSession;
+        if (s.isAnswered) return;
+        const questions = s.stageIdx === 1 ? s.unit.grammarQuiz : s.unit.bossQuestions;
+        const q = questions[s.qIdx];
+
+        s.selectedOption = idx;
+        s.isAnswered = true;
+
+        if (idx === q.answer) {
+          sfx.correct();
+          s.combo = (s.combo || 0) + 1;
+          if (s.combo >= 2) {
+            this.showToast(`🔥 Combo x${s.combo}! Trả lời liên tiếp cực đỉnh!`, '⚡');
+          }
+          if (s.stageIdx === 3) {
+            s.bossHp = Math.max(0, s.bossHp - Math.ceil(100 / questions.length));
+          }
+        } else {
+          sfx.wrong();
+          s.combo = 0;
+          if (this.loseHeart()) return;
+        }
+        this.render();
+      }
+
+      nextQuizQuestion() {
+        sfx.click();
+        const s = this.activeSession;
+        const questions = s.stageIdx === 1 ? s.unit.grammarQuiz : s.unit.bossQuestions;
+
+        if (s.qIdx < questions.length - 1) {
+          s.qIdx += 1;
+          s.selectedOption = null;
+          s.isAnswered = false;
+          s.hiddenOptions = [];
+          this.render();
+        } else {
+          const comboBonus = (s.combo || 0) * 5;
+          if (s.stageIdx === 1) {
+            this.completeStage(45 + comboBonus, 20);
+          } else {
+            this.clearTimer();
+            this.completeStage(90 + comboBonus, 45, true);
+          }
+        }
+      }
+
+      /**
+       * --- STAGE 3: SENTENCE BUILDER ---
+       */
+      renderStage3Sentence(s) {
+        const item = s.sentences[s.sIdx];
+        const pct = Math.round((s.sIdx / s.sentences.length) * 100);
+
+        return `
+          <div class="max-w-2xl mx-auto">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-purple-500 transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+              <span class="text-xs font-black text-slate-500">Câu ${s.sIdx + 1}/${s.sentences.length}</span>
+            </div>
+
+            <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-md mb-5">
+              <div class="text-xs font-black text-purple-600 uppercase mb-1">🇻🇳 Dịch & Sắp xếp thành câu tiếng Anh hoàn chỉnh:</div>
+              <p class="text-base sm:text-lg font-extrabold text-slate-800 mb-5">"${item.hint}"</p>
+
+              <!-- Answer Drop Zone -->
+              <div class="min-h-[84px] bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-3 flex flex-wrap gap-2 items-center mb-5">
+                ${s.chosenIndices.length === 0 ? `<span class="text-xs font-bold text-slate-400 mx-auto">Nhấn vào các từ bên dưới để ghép câu...</span>` : ''}
+                ${s.chosenIndices.map((wordIdx, pos) => `
+                  <button onclick="app.removeWord(${pos})" ${s.isChecked && s.isCorrect ? 'disabled' : ''} class="btn-3d btn-blue px-3.5 py-2 rounded-xl font-extrabold text-sm">
+                    ${item.shuffled[wordIdx]}
+                  </button>
+                `).join('')}
+              </div>
+
+              <!-- Word Bank -->
+              <div class="flex flex-wrap gap-2.5 justify-center">
+                ${item.shuffled.map((w, idx) => {
+                  const used = s.chosenIndices.includes(idx);
+                  return `
+                    <button onclick="app.pickWord(${idx})" ${used || (s.isChecked && s.isCorrect) ? 'disabled' : ''} class="btn-3d ${used ? 'bg-slate-200 text-transparent border-slate-200 shadow-none' : 'btn-white'} px-3.5 py-2 rounded-xl font-extrabold text-sm">
+                      ${w}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            ${!s.isChecked || !s.isCorrect ? `
+              <button onclick="app.checkSentence()" ${s.chosenIndices.length !== item.words.length ? 'disabled' : ''} class="btn-3d btn-green w-full py-3.5 rounded-2xl font-black text-base">
+                Kiểm tra câu trả lời ✔
+              </button>
+            ` : `
+              <div class="bg-emerald-50 border-2 border-emerald-300 rounded-3xl p-4 animate-pop">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="font-black text-emerald-700 text-base">🎉 Tuyệt vời! Câu hoàn toàn chính xác.</span>
+                  <button onclick="speakEnglish('${item.words.join(' ').replace(/'/g, "\\'")}')" class="text-xs font-black text-sky-600 bg-white px-3 py-1.5 rounded-xl border border-sky-200">
+                    🔊 Nghe câu
+                  </button>
+                </div>
+                <button onclick="app.nextSentence()" class="btn-3d btn-green w-full py-3 rounded-2xl font-black text-sm">
+                  ${s.sIdx < s.sentences.length - 1 ? 'Câu tiếp theo →' : 'Hoàn thành Ghép Câu 🏆'}
+                </button>
+              </div>
+            `}
+          </div>
+        `;
+      }
+
+      pickWord(wordIdx) {
+        sfx.click();
+        const s = this.activeSession;
+        if (!s.chosenIndices.includes(wordIdx)) {
+          s.chosenIndices.push(wordIdx);
+          s.isChecked = false;
+          this.render();
+        }
+      }
+
+      removeWord(pos) {
+        sfx.click();
+        const s = this.activeSession;
+        s.chosenIndices.splice(pos, 1);
+        s.isChecked = false;
+        this.render();
+      }
+
+      checkSentence() {
+        const s = this.activeSession;
+        const item = s.sentences[s.sIdx];
+        const userSentence = s.chosenIndices.map(i => item.shuffled[i]).join(' ');
+        const targetSentence = item.words.join(' ');
+
+        s.isChecked = true;
+        if (userSentence === targetSentence) {
+          sfx.correct();
+          s.isCorrect = true;
+          speakEnglish(targetSentence);
+        } else {
+          sfx.wrong();
+          s.isCorrect = false;
+          this.showToast('Thứ tự từ chưa đúng rồi, hãy sắp xếp lại nhé!', '❌');
+          if (this.loseHeart()) return;
+        }
+        this.render();
+      }
+
+      nextSentence() {
+        sfx.click();
+        const s = this.activeSession;
+        if (s.sIdx < s.sentences.length - 1) {
+          s.sIdx += 1;
+          s.chosenIndices = [];
+          s.isChecked = false;
+          s.isCorrect = false;
+          this.render();
+        } else {
+          this.completeStage(50, 25);
+        }
+      }
+
+      /**
+       * --- STAGE 4: UNIT BOSS CHALLENGE ---
+       */
+      renderStage4Boss(s) {
+        const questions = s.unit.bossQuestions;
+        const q = questions[s.qIdx];
+
+        return `
+          <div class="max-w-2xl mx-auto">
+            <!-- Boss Arena Bar -->
+            <div class="bg-slate-900 text-white rounded-3xl p-4 sm:p-5 mb-5 shadow-lg border-2 border-slate-700">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-14 h-14 rounded-2xl bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center text-3xl animate-float">
+                    ${s.unit.bossIcon}
+                  </div>
+                  <div>
+                    <div class="text-xs font-black text-rose-400 uppercase">BOSS CUỐI UNIT</div>
+                    <div class="font-black text-base sm:text-lg">${s.unit.bossName}</div>
+                    <!-- Boss HP Bar -->
+                    <div class="w-36 sm:w-48 h-3 bg-slate-700 rounded-full overflow-hidden mt-1.5 border border-slate-600">
+                      <div class="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-500" style="width: ${s.bossHp}%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="text-center bg-slate-800 px-4 py-2 rounded-2xl border border-slate-700">
+                  <div class="text-[10px] font-extrabold text-slate-400 uppercase">Thời gian</div>
+                  <div id="boss-timer" class="text-xl sm:text-2xl font-black text-amber-400">${s.timeLeft}s</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-black text-slate-500">Đòn tấn công ${s.qIdx + 1}/${questions.length}</span>
+              <button onclick="app.useHint()" ${s.isAnswered || s.hiddenOptions.length > 0 ? 'disabled' : ''} class="btn-3d btn-amber px-3 py-1 rounded-xl font-black text-xs">
+                💡 50/50 (${this.state.hints})
+              </button>
+            </div>
+
+            <div class="bg-white rounded-3xl border-2 border-slate-200 p-5 sm:p-6 shadow-md mb-4">
+              <p class="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed mb-5">${q.q}</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${q.options.map((opt, idx) => {
+                  if (s.hiddenOptions.includes(idx)) {
+                    return `<div class="p-3.5 rounded-2xl border-2 border-dashed border-slate-200 text-slate-300 text-center font-bold text-sm">Đã loại bỏ</div>`;
+                  }
+                  let btnClass = "btn-white";
+                  if (s.isAnswered) {
+                    if (idx === q.answer) btnClass = "btn-green";
+                    else if (idx === s.selectedOption) btnClass = "btn-red";
+                    else btnClass = "btn-white opacity-50";
+                  }
+                  return `
+                    <button onclick="app.answerQuiz(${idx})" ${s.isAnswered ? 'disabled' : ''} class="btn-3d ${btnClass} p-3.5 rounded-2xl font-extrabold text-sm sm:text-base text-left flex items-center gap-2.5">
+                      <span class="w-7 h-7 rounded-lg bg-black/10 flex items-center justify-center text-xs font-black shrink-0">${['A','B','C','D'][idx]}</span>
+                      <span>${opt}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            ${s.isAnswered ? `
+              <div class="rounded-3xl p-4 border-2 animate-pop ${s.selectedOption === q.answer ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300'}">
+                <div class="font-black text-sm mb-1 ${s.selectedOption === q.answer ? 'text-emerald-700' : 'text-rose-700'}">
+                  ${s.selectedOption === q.answer ? '⚔️ Đòn đánh chí mạng! Boss mất máu!' : '🛡️ Boss đỡ được đòn!'}
+                </div>
+                <p class="text-xs sm:text-sm font-semibold text-slate-700 mb-3">${q.explain}</p>
+                <button onclick="app.nextQuizQuestion()" class="btn-3d btn-purple w-full py-3 rounded-2xl font-black text-sm">
+                  ${s.qIdx < questions.length - 1 ? 'Tiếp tục tấn công →' : 'Kết liễu Boss! 💥'}
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      /**
+       * ==========================================================================
+       * 8. STAGE COMPLETION & CELEBRATION
+       * ==========================================================================
+       */
+      completeStage(xpReward, coinReward, isBoss = false) {
+        const s = this.activeSession;
+        const unitId = s.unit.id;
+        const stageIdx = s.stageIdx;
+
+        // Mark stage complete
+        this.state.unitProgress[unitId][stageIdx] = true;
+        this.unlockBadge('first_step');
+
+        // Check Semester 1 (Units 1-6) & Semester 2 (Units 7-12) completion badges
+        const sem1Done = [1, 2, 3, 4, 5, 6].every(id => this.state.unitProgress[id]?.[3]);
+        const sem2Done = [7, 8, 9, 10, 11, 12].every(id => this.state.unitProgress[id]?.[3]);
+        if (sem1Done) this.unlockBadge('semester_1');
+        if (sem2Done) this.unlockBadge('semester_2');
+
+        let extraMsg = '';
+        if (isBoss) {
+          this.unlockBadge(s.unit.badge.id);
+          const nextUnitId = unitId + 1;
+          if (nextUnitId <= UNITS_DATA.length && !this.state.unlockedUnits.includes(nextUnitId)) {
+            this.state.unlockedUnits.push(nextUnitId);
+            extraMsg = `<br><span class="text-emerald-600 font-black">🔓 Đã mở khóa Unit ${nextUnitId}!</span>`;
+          }
+          extraMsg += `<br><span class="text-amber-600 font-black">🏅 Nhận huy hiệu: ${s.unit.badge.name}</span>`;
+          sfx.victory();
+          triggerConfetti();
+        } else {
+          sfx.levelUp();
+        }
+
+        this.addXP(xpReward);
+        this.addCoins(coinReward);
+        this.saveState();
+
+        this.showModal(
+          isBoss ? '👑' : '🎉',
+          isBoss ? `Đánh Bại ${s.unit.bossName}!` : 'Hoàn Thành Chặng Thử Thách!',
+          `Bạn nhận được <b>+${xpReward} XP</b> và <b>+${coinReward} Xu vàng</b>!${extraMsg}`,
+          [
+            {
+              label: 'Tiếp tục hành trình 🗺️',
+              class: 'btn-green',
+              onClick: () => {
+                this.closeModal();
+                this.goHome();
+              }
+            }
+          ]
+        );
+      }
+    }
+
+    /**
+     * ============================================================================
+     * 9. CONFETTI CELEBRATION EFFECT
+     * ============================================================================
+     */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#58cc02', '#1cb0f6', '#ffc800', '#ff4b4b', '#ce82ff'];
+      const pieces = Array.from({ length: 90 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: Math.random() * 10 + 6,
+        h: Math.random() * 6 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vy: Math.random() * 3 + 2,
+        vx: (Math.random() - 0.5) * 2,
+        rot: Math.random() * 360,
+        vRot: (Math.random() - 0.5) * 10
+      }));
+
+      let frames = 0;
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          p.rot += p.vRot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 160) requestAnimationFrame(loop);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      loop();
+    }
+
+    // Initialize Application
+    const app = new English9Game();
+  </script>
+</body>
+</html>
